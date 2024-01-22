@@ -250,6 +250,7 @@ void Overlay::DestroyOverlay()
 {
     DestroyWindow(overlay);
     UnregisterClassW(wc.lpszClassName, wc.hInstance);
+    printf("[OV]Destroyed Overlay\n");
 }
 
 void Overlay::DestroyDevice()
@@ -269,6 +270,7 @@ void Overlay::DestroyDevice()
     if (target_view) {
         target_view->Release();
     }
+    printf("[OV]Destroyed Device\n");
 }
 
 void Overlay::DestroyImGui()
@@ -277,6 +279,7 @@ void Overlay::DestroyImGui()
     ImGui_ImplWin32_Shutdown();
 
     ImGui::DestroyContext();
+    printf("[OV]Destroyed ImGui\n");
 }
 
 void Debug::ShowConsole()

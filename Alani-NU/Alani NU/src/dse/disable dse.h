@@ -35,5 +35,8 @@ public:
 	NTSTATUS DisableDSE(PVOID g_CiOptionsAddress, HANDLE driverHandle);
 	bool LoadHookDriver();
 	NTSTATUS EnableDSE(PVOID g_CiOptionsAddress,HANDLE driverHandle);
+	bool UnLoadGigDriver();
+	bool StopDependentServices(SC_HANDLE hServiceMgr, SC_HANDLE hServiceDDK);
+	bool UnLoadHookDriver();
 };
 inline DSE dse;

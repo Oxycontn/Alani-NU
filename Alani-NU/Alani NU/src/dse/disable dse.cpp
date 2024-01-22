@@ -35,7 +35,7 @@ bool DSE::LoadGigDriver()
 		hServiceDDK = OpenService(hServiceMgr, "driver1", SERVICE_ALL_ACCESS);
 		if (!hServiceDDK)
 		{
-			printf("[GDRV]OpenService() Failed %d\n", GetLastError());
+			printf("[GDRV]OpenService Failed %d\n", GetLastError());
 			results = FALSE;
 		}
 	}
@@ -45,22 +45,19 @@ bool DSE::LoadGigDriver()
 	{
 		if (GetLastError() != ERROR_IO_PENDING && GetLastError() != ERROR_SERVICE_ALREADY_RUNNING)
 		{
-			printf("[GDRV]StartService() Failed %d\n", GetLastError());
+			printf("[GDRV]StartService Failed %d\n", GetLastError());
 			results = FALSE;
 		}
-	}
-	results = TRUE;
-
-	if (hServiceDDK)
-	{
-		CloseServiceHandle(hServiceDDK);
-	}
-	if (hServiceMgr)
-	{
-		CloseServiceHandle(hServiceMgr);
+		else
+			results = TRUE;
 	}
 
-	printf("[GDRV]Loaded Gigabyte Driver\n");
+	CloseServiceHandle(hServiceDDK);
+	CloseServiceHandle(hServiceMgr);
+
+	if (results)
+		printf("[GDRV]Loaded Gigabyte Driver\n");
+
 	return results;
 }
 
@@ -320,7 +317,7 @@ bool DSE::LoadHookDriver()
 		hServiceDDK = OpenService(hServiceMgr, "driver2", SERVICE_ALL_ACCESS);
 		if (!hServiceDDK)
 		{
-			printf("[Hook]OpenService() Failed %d\n", GetLastError());
+			printf("[Hook]OpenService Failed %d\n", GetLastError());
 			results = FALSE;
 		}
 	}
@@ -330,22 +327,20 @@ bool DSE::LoadHookDriver()
 	{
 		if (GetLastError() != ERROR_IO_PENDING && GetLastError() != ERROR_SERVICE_ALREADY_RUNNING)
 		{
-			printf("[Hook]StartService() Failed %d\n", GetLastError());
+			printf("[Hook]StartService Failed %d\n", GetLastError());
 			results = FALSE;
 		}
+		else
+			results = TRUE;
 	}
 	results = TRUE;
 
-	if (hServiceDDK)
-	{
-		CloseServiceHandle(hServiceDDK);
-	}
-	if (hServiceMgr)
-	{
-		CloseServiceHandle(hServiceMgr);
-	}
+	CloseServiceHandle(hServiceDDK);
+	CloseServiceHandle(hServiceMgr);
 
-	printf("[Hook]Loaded Hook Driver\n");
+	if (results)
+		printf("[Hook]Loaded Hook Driver\n");
+
 	return results;
 }
 
@@ -373,5 +368,181 @@ NTSTATUS DSE::EnableDSE(PVOID g_CiOptionsAddress, HANDLE driverHandle)
 		printf("[GDRV]DSE Enable\n");
 		return STATUS_SUCCESS;
 	}
+}
+
+bool DSE::UnLoadGigDriver()
+{
+	SERVICE_STATUS_PROCESS ssp;
+	bool results;
+
+	SC_HANDLE hServiceMgr = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
+
+	if (!hServiceMgr)
+	{
+		printf("[GDRV]OpenSCManager Failed %d\n", GetLastError());
+		results = FALSE;
+	}
+
+	SC_HANDLE hServiceDDK = OpenService(hServiceMgr, "driver1", SERVICE_ALL_ACCESS);
+	if (!hServiceDDK)
+	{
+		printf("[GDRV]OpenService Failed %d\n", GetLastError());
+		results = FALSE;
+	}
+
+	results = ControlService(hServiceDDK, SERVICE_CONTROL_STOP, (LPSERVICE_STATUS)&ssp);
+
+	if (!results)
+	{
+		results = FALSE;
+		printf("[GDRV]ControlService Failed %d\n", GetLastError());
+	}
+	else
+	{
+		results = TRUE;
+		printf("[GDRV]Giagabyte Driver Unloaded!\n");
+	}
+
+	CloseServiceHandle(hServiceDDK);
+	CloseServiceHandle(hServiceMgr);
+
+	return results;
+}
+
+//from MS https://learn.microsoft.com/en-us/windows/win32/services/stopping-a-service
+bool DSE::StopDependentServices(SC_HANDLE hServiceMgr, SC_HANDLE hServiceDDK)
+{
+	DWORD i;
+	DWORD dwBytesNeeded;
+	DWORD dwCount;
+
+	LPENUM_SERVICE_STATUS   lpDependencies = NULL;
+	ENUM_SERVICE_STATUS     ess;
+	SC_HANDLE               hDepService;
+	SERVICE_STATUS_PROCESS  ssp;
+
+	DWORD dwStartTime = GetTickCount();
+	DWORD dwTimeout = 30000; // 30-second time-out
+
+	// Pass a zero-length buffer to get the required buffer size.
+	if (EnumDependentServices(hServiceDDK, SERVICE_ACTIVE,
+		lpDependencies, 0, &dwBytesNeeded, &dwCount))
+	{
+		// If the Enum call succeeds, then there are no dependent
+		// services, so do nothing.
+		return TRUE;
+	}
+	else
+	{
+		if (GetLastError() != ERROR_MORE_DATA)
+			return FALSE; // Unexpected error
+
+		// Allocate a buffer for the dependencies.
+		lpDependencies = (LPENUM_SERVICE_STATUS)HeapAlloc(
+			GetProcessHeap(), HEAP_ZERO_MEMORY, dwBytesNeeded);
+
+		if (!lpDependencies)
+			return FALSE;
+
+		__try {
+			// Enumerate the dependencies.
+			if (!EnumDependentServices(hServiceDDK, SERVICE_ACTIVE,
+				lpDependencies, dwBytesNeeded, &dwBytesNeeded,
+				&dwCount))
+				return FALSE;
+
+			for (i = 0; i < dwCount; i++)
+			{
+				ess = *(lpDependencies + i);
+				// Open the service.
+				hDepService = OpenService(hServiceMgr,
+					ess.lpServiceName,
+					SERVICE_STOP | SERVICE_QUERY_STATUS);
+
+				if (!hDepService)
+					return FALSE;
+
+				__try {
+					// Send a stop code.
+					if (!ControlService(hDepService,
+						SERVICE_CONTROL_STOP,
+						(LPSERVICE_STATUS)&ssp))
+						return FALSE;
+
+					// Wait for the service to stop.
+					while (ssp.dwCurrentState != SERVICE_STOPPED)
+					{
+						Sleep(ssp.dwWaitHint);
+						if (!QueryServiceStatusEx(
+							hDepService,
+							SC_STATUS_PROCESS_INFO,
+							(LPBYTE)&ssp,
+							sizeof(SERVICE_STATUS_PROCESS),
+							&dwBytesNeeded))
+							return FALSE;
+
+						if (ssp.dwCurrentState == SERVICE_STOPPED)
+							break;
+
+						if (GetTickCount() - dwStartTime > dwTimeout)
+							return FALSE;
+					}
+				}
+				__finally
+				{
+					// Always release the service handle.
+					CloseServiceHandle(hDepService);
+				}
+			}
+		}
+		__finally
+		{
+			// Always free the enumeration buffer.
+			HeapFree(GetProcessHeap(), 0, lpDependencies);
+		}
+	}
+	return TRUE;
+}
+
+bool DSE::UnLoadHookDriver()
+{
+	SERVICE_STATUS_PROCESS ssp;
+	bool results;
+
+	SC_HANDLE hServiceMgr = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
+
+	if (!hServiceMgr)
+	{
+		printf("[Hook]OpenSCManager Failed %d\n", GetLastError());
+		results = FALSE;
+	}
+
+	SC_HANDLE hServiceDDK = OpenService(hServiceMgr, "driver2", SERVICE_ALL_ACCESS);
+	if (!hServiceDDK)
+	{
+		printf("[Hook]OpenService Failed %d\n", GetLastError());
+		results = FALSE;
+	}
+
+	//driver dependices need to be stoppped before unloading driver or a BSOD will occur
+	StopDependentServices(hServiceMgr, hServiceDDK);
+
+	results = ControlService(hServiceDDK, SERVICE_CONTROL_STOP, (LPSERVICE_STATUS)&ssp);
+
+	if (!results)
+	{
+		results = FALSE;
+		printf("[Hook]ControlService Failed %d\n", GetLastError());
+	}
+	else
+	{
+		results = TRUE;
+		printf("[Hook]Hook Driver Unloaded!\n");
+	}
+
+	CloseServiceHandle(hServiceDDK);
+	CloseServiceHandle(hServiceMgr);
+
+	return results;
 }
 

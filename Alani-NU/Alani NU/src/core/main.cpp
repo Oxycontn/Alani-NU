@@ -22,17 +22,34 @@
 //disableing DSE
 #include "..\dse\disable dse.h"
 
+BOOL WINAPI CtrlHandler(DWORD fdwCtrlType)
+{
+    switch (fdwCtrlType)
+    {
+    case CTRL_CLOSE_EVENT:
+        //if the user closes the debug console make sure to unload hook driver
+        dse.UnLoadHookDriver();
+        return TRUE;
+
+    default:
+        return FALSE;
+    }
+}
+
 void StartThreads()
 {
     std::thread EspThread(&CEntityLoop::EspThread, &entityloop);
     std::thread AimbotThread(&CAimbot::AimbotThread, &aimbot);
 
-    EspThread.join();
-    AimbotThread.join();
+    EspThread.detach();
+    AimbotThread.detach();
 }
 
 int main()
 {
+    //control handler
+    SetConsoleCtrlHandler(CtrlHandler, TRUE);
+
     //for debugging
     debug.ShowConsole();
 
@@ -80,7 +97,14 @@ int main()
 
         //close handle to gig driver
         CloseHandle(ghDriver);
+
+        //unload gig driver
+        results = dse.UnLoadGigDriver();
+        if (!results)
+            return 0;
     }
+    else
+        return 0;
 
     //now since the driver is loaded open up cs2!
     printf("[CS2]You may now load CS2");
@@ -101,9 +125,21 @@ int main()
 
     StartThreads();
 
-    //exit calls
-    printf("Exiting\n");
+    while(true)
+    {
+        if (FindWindowW(NULL, L"Counter-Strike 2") == NULL)
+            break;
+        else
+            continue;
+    }
 
+    //exit calls
+    printf("[CS2]Exiting\n");
+
+    //unload hook driver
+    dse.UnLoadHookDriver();
+
+    //destory overlay
     overlay.DestroyOverlay();
     overlay.DestroyImGui();
     overlay.DestroyOverlay();
