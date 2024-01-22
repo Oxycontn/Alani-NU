@@ -5,12 +5,13 @@
 #include "entity.h"
 #include "aimbot.h"
 #include "..\mem\memory.h"
+#include "local.h"
 
 void CRCS::RcsLoop()
 {
 	std::string weaponName = global.localPlayer.weaponName;
-	uintptr_t localPlayerPawn = global.localPlayer.localPlayerPawn;
-	int shotsFired = Read<int>(localPlayerPawn + offset::m_iShotsFired);
+	auto localPlayerPawn = CLocal::GetLocalPawn();
+	int shotsFired = localPlayerPawn->ShotsFired();
 
 	if (global.features.rcsenable && !aimbot.aimbotRCS)
 	{
@@ -18,10 +19,11 @@ void CRCS::RcsLoop()
 		{
 			if (shotsFired != 0 && GetAsyncKeyState(VK_LBUTTON))
 			{
-				Vector2 viewAngles = Read<Vector2>(localPlayerPawn + offset::v_angle);
-				aimPunchCache aimpunchCache = Read<aimPunchCache>(localPlayerPawn + offset::m_aimPunchCache);
+				Vector2 viewAngles = localPlayerPawn->ViewAngle();
 
-				Vector2 aimPunch = Read<Vector2>(aimpunchCache.data + (aimpunchCache.count - 1) * sizeof(Vector));
+				aimPunchCache aimpunchCache = localPlayerPawn->AimPunch();
+
+				Vector2 aimPunch = CLocal::AimPunchAngle(aimpunchCache);
 
 				if (!aimPunch.x && !aimPunch.y)
 					return;

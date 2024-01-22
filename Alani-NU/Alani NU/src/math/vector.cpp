@@ -105,3 +105,80 @@ constexpr const Vector2& Vector2::operator*(const float factor) const noexcept
 {
     return Vector2{ x * factor, y * factor };
 }
+
+void Vector2::AimAtPos(float x, float y)
+{
+    int width = GetSystemMetrics(SM_CXSCREEN);
+    int height = GetSystemMetrics(SM_CYSCREEN);
+    int ScreenCenterY = height * 0.5f;
+    int ScreenCenterX = width * 0.5f;
+
+    float AimSpeed = 5;
+    float TargetX = 0;
+    float TargetY = 0;
+
+    //X Axis
+    if (x != 0)
+    {
+        if (x > ScreenCenterX)
+        {
+            TargetX = -(ScreenCenterX - x);
+            TargetX /= AimSpeed;
+            if (TargetX + ScreenCenterX > ScreenCenterX * 2) TargetX = 0;
+        }
+
+        if (x < ScreenCenterX)
+        {
+            TargetX = x - ScreenCenterX;
+            TargetX /= AimSpeed;
+            if (TargetX + ScreenCenterX < 0) TargetX = 0;
+        }
+    }
+
+    //Y Axis
+
+    if (y != 0)
+    {
+        if (y > ScreenCenterY)
+        {
+            TargetY = -(ScreenCenterY - y);
+            TargetY /= AimSpeed;
+            if (TargetY + ScreenCenterY > ScreenCenterY * 2) TargetY = 0;
+        }
+
+        if (y < ScreenCenterY)
+        {
+            TargetY = y - ScreenCenterY;
+            TargetY /= AimSpeed;
+            if (TargetY + ScreenCenterY < 0) TargetY = 0;
+        }
+    }
+
+    TargetX /= 10;
+    TargetY /= 10;
+
+    //Mouse even't will round to 0 a lot of the time, so we can add this, to make it more accurrate on slow speeds.
+    if (fabs(TargetX) < 1)
+    {
+        if (TargetX > 0)
+        {
+            TargetX = 1;
+        }
+        if (TargetX < 0)
+        {
+            TargetX = -1;
+        }
+    }
+    if (fabs(TargetY) < 1)
+    {
+        if (TargetY > 0)
+        {
+            TargetY = 1;
+        }
+        if (TargetY < 0)
+        {
+            TargetY = -1;
+        }
+    }
+    mouse_event(MOUSEEVENTF_MOVE, TargetX, TargetY, NULL, NULL);
+}

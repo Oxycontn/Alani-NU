@@ -54,11 +54,13 @@ int main()
     debug.ShowConsole();
 
     //driver needs to be loaded before cs2 is open
+    /*
     if (FindWindow(NULL, "Counter-Strike 2") != NULL)
     {
         MessageBoxA(NULL, "CS2 Needs to be closed to load the driver Properly. Close CS2 and re-launch Alani-NU!", "Alani-NU", MB_OK | MB_ICONQUESTION);
         return 0;
     }
+    */
 
     //we need to disable DSE then we load the Driver!
     bool results = dse.LoadGigDriver();
@@ -107,21 +109,24 @@ int main()
         return 0;
 
     //now since the driver is loaded open up cs2!
-    printf("[CS2]You may now load CS2");
+    printf("[CS2]You may now load CS2\n");
     MessageBoxA(NULL, "Driver loaded Properly! You may now open up CS2.", "Alani-NU", MB_OK | MB_ICONQUESTION);
 
     //wait for cs2 to open
     while (FindWindowW(NULL, L"Counter-Strike 2") == NULL)
         continue;
 
-    //get pid and call for dlls
-    pid = GetProcesByName("cs2.exe");
-    printf("[CS2]PID : %d\n", pid);
 
-    global.modules.client = GetDllBase("Client.dll");
-    printf("[CS2]Cleint : %p\n", global.modules.client);
-    global.modules.engine = GetDllBase("Engine2.dll");
+    //get pid and call for dlls
+    driver.pid = driver.GetProcesByName("cs2.exe");
+    printf("[CS2]PID : %d\n", driver.pid);
+
+    Sleep(2000);
+
+    global.modules.engine = driver.GetDllBase("engine2.dll");
     printf("[CS2]Engine : %p\n", global.modules.engine);
+    global.modules.client = driver.GetDllBase("client.dll");
+    printf("[CS2]Cleint : %p\n", global.modules.client);
 
     StartThreads();
 

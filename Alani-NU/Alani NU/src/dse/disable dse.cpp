@@ -524,9 +524,6 @@ bool DSE::UnLoadHookDriver()
 		results = FALSE;
 	}
 
-	//driver dependices need to be stoppped before unloading driver or a BSOD will occur
-	StopDependentServices(hServiceMgr, hServiceDDK);
-
 	results = ControlService(hServiceDDK, SERVICE_CONTROL_STOP, (LPSERVICE_STATUS)&ssp);
 
 	if (!results)

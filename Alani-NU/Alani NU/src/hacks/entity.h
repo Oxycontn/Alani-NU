@@ -28,11 +28,9 @@ public:
 
 	Vector Bone(int bone) const noexcept;
 
-	std::string GetWeaponName();
+	char GetWeaponName();
 	// will move into its own class eventually, along with playerController. let me do this alone so i have something to work on tmrw, thanks.
-	static std::string GetWeaponNameLocal(uintptr_t pawn);
-	static std::string ReadDesignerName(uintptr_t designerNameptr);
-	static std::string GetPlayerName(uintptr_t playerController);
+	static char GetPlayerName(uintptr_t playerController);
 
 private:
 	uintptr_t entityAddress;

@@ -7,6 +7,7 @@
 #include "..\classes\bone.hpp"
 #include "rcs.h"
 #include "..\mem\memory.h"
+#include "local.h"
 
 void CAimbot::AimbotThread()
 {
@@ -45,13 +46,15 @@ void CAimbot::AimbotLoop()
 		Vector playerPos = pCSPlayerPawn->Feet(bonearray);
 
 		std::string weaponName = global.localPlayer.weaponName;
-		uintptr_t localPlayerPawn = global.localPlayer.localPlayerPawn;
-		Vector localPos = Read<Vector>(localPlayerPawn + offset::Origin);
-		Vector2 viewAngle = Read<Vector2>(localPlayerPawn + offset::v_angle);
-		uintptr_t clippingWeapon = Read<uintptr_t>(localPlayerPawn + offset::m_pClippingWeapon);
-		bool ammo = Read<bool>(clippingWeapon + 0x1570);
-		int shotsFired = Read<int>(localPlayerPawn + offset::m_iShotsFired);
-		auto fFlags = Read<int32_t>(localPlayerPawn + offset::m_fFlags);
+
+		auto localPlayerPawn = CLocal::GetLocalPawn();
+		Vector localPos = localPlayerPawn->Position();
+
+		Vector2 viewAngle = localPlayerPawn->ViewAngle();
+		bool ammo = localPlayerPawn->Ammo();
+
+		int shotsFired = localPlayerPawn->ShotsFired();
+		auto fFlags = localPlayerPawn->Flags();
 
 		Vector bonePos = AimbotBone(weaponName, bonearray);
 
@@ -108,9 +111,9 @@ void CAimbot::AimbotLoop()
 						{
 							if (shotsFired != 0)
 							{
-								aimPunchCache aimpunchCache = Read<aimPunchCache>(localPlayerPawn + offset::m_aimPunchCache);
+								aimPunchCache aimpunchCache = localPlayerPawn->AimPunch();
 
-								Vector2 aimPunch = Read<Vector2>(aimpunchCache.data + (aimpunchCache.count - 1) * sizeof(Vector));
+								Vector2 aimPunch = CLocal::AimPunchAngle(aimpunchCache);
 
 								if (!aimPunch.x && !aimPunch.y)
 									return;
@@ -148,6 +151,7 @@ void CAimbot::AimbotLoop()
 						{
 							if (aimbotAuto)
 							{
+								Vector2::AimAtPos(pitch, yaw);
 								mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
 								mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
 								Sleep(aimbotSleep);
@@ -253,10 +257,10 @@ Vector CAimbot::AimbotBone(std::string weaponName, uintptr_t bonearray)
 {
 	Vector bone;
 
-	Vector boneHead = Read<Vector>(bonearray + bones::head * 32);
-	Vector boneNeck = Read<Vector>(bonearray + bones::neck * 32);
-	Vector boneSpine = Read<Vector>(bonearray + bones::spine * 32);
-	Vector boneCock = Read<Vector>(bonearray + bones::cock * 32);
+	Vector boneHead = driver.Read<Vector>(bonearray + bones::head * 32);
+	Vector boneNeck = driver.Read<Vector>(bonearray + bones::neck * 32);
+	Vector boneSpine = driver.Read<Vector>(bonearray + bones::spine * 32);
+	Vector boneCock = driver.Read<Vector>(bonearray + bones::cock * 32);
 
 	//AR
 	if (weaponName == "weapon_ak47" || weaponName == "weapon_aug" || weaponName == "weapon_famas" || weaponName == "weapon_galilar" || weaponName == "weapon_m4a1_silencer" || weaponName == "weapon_m4a1" || weaponName == "weapon_sg553")

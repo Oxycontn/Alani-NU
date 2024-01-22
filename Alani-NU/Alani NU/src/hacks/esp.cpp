@@ -10,6 +10,8 @@
 #include "../classes/bone.hpp"
 #include "aimbot.h"
 #include "..\mem\memory.h"
+#include "local.h"
+#include "wentity.h"
 
 //esp
 void CEntityLoop::EspThread()
@@ -51,36 +53,29 @@ void CEntityLoop::EspThread()
 
 void CEntityLoop::ReadLocalPlayer()
 {
-    uintptr_t localPlayerController = Read<uintptr_t>(global.modules.client + offset::dwLocalPlayerController);
-    uintptr_t localPlayerPawn = Read<uintptr_t>(global.modules.client + offset::dwLocalPlayerPawn);
-    view_matrix_t vm = Read<view_matrix_t>(global.modules.client + offset::dwViewMatrix);
+    uintptr_t localPlayerController = driver.Read<uintptr_t>(global.modules.client + offset::dwLocalPlayerController);
+    auto localPlayerPawn = CLocal::GetLocalPawn();
+    view_matrix_t vm = CLocal::GetViewMatrix();
 
-    int localTeam = Read<int>(localPlayerPawn + offset::m_iTeamNum);
-    int health = Read<int>(localPlayerPawn + offset::m_iHealth);
-    int ping = Read<int>(localPlayerController + offset::m_iPing);
+    int localTeam = localPlayerPawn->Team();
+    int health = localPlayerPawn->Health();
 
-    std::string weaponName = CEntity::GetWeaponNameLocal(localPlayerPawn);
+    char weaponName = localPlayerPawn->GetWeaponNameLocal();
 
-    Vector position = Read<Vector>(localPlayerPawn + offset::Origin);
+    Vector position = localPlayerPawn->Position();
 
-    //cache info
-    if (localPlayerController != 0)
-    {
-        global.localPlayer.localPlayerPawn = localPlayerPawn;
-        global.localPlayer.localPlayerController = localPlayerController;
-        global.localPlayer.team = localTeam;
-        global.localPlayer.health = health;
-        global.localPlayer.vm = vm;
-        global.localPlayer.ping = ping;
-        global.localPlayer.position = position;
-        global.localPlayer.weaponName = weaponName;
-    }
+    global.localPlayer.localPlayerController = localPlayerController;
+    global.localPlayer.team = localTeam;
+    global.localPlayer.health = health;
+    global.localPlayer.vm = vm;
+    global.localPlayer.position = position;
+    global.localPlayer.weaponName = weaponName;
 }
 
 void CEntityLoop::EspLoop()
 {
     uintptr_t entityList = CEntity::GetEntityList();
-    int entMax = Read<int>(entityList + offset::dwGameEntitySystem_getHighestEntityIndex);
+    int entMax = driver.Read<int>(entityList + offset::dwGameEntitySystem_getHighestEntityIndex);
 
     for (int i = 1; i < entMax; ++i)
     {
@@ -122,10 +117,9 @@ void CEntityLoop::EspLoop()
             head.y = readFeet.y;
             head.z = readFeet.z + 75.f;
 
-            std::string playerName = CEntity::GetPlayerName(playerController);
-            std::string weaponName = pCSPlayerPawn->GetWeaponName();
+            char playerName = CEntity::GetPlayerName(playerController);
+            char weaponName = pCSPlayerPawn->GetWeaponName();
 
-            global.player.dwEntityList = entityList;
             global.player.health = health;
             global.player.team = playerTeam; 
             global.player.armor = armor;
@@ -143,21 +137,23 @@ void CEntityLoop::EspLoop()
         //world entities
         if (i >= 65)
         {
-            int entityOwner = Read<int>(playerController + offset::m_hOwnerEntity);
+            auto entityController = CWEntity::EntityController(playerController);
+
+            auto entityOwner = entityController->EntityOwner();
             if (entityOwner != -1)
                 continue;
 
-            uintptr_t pEntity = Read<uintptr_t>(playerController + offset::m_pEntity);
+            auto pEntity = entityController->PEntity();
 
-            uintptr_t designerNameptr = Read<uintptr_t>(pEntity + offset::m_designerName);
+            auto designerNameptr = CWEntity::DesignerNamePtr(pEntity);
 
-            std::string designerName = CEntity::ReadDesignerName(designerNameptr);
+            std::string designerName = CWEntity::ReadDesignerName(designerNameptr);
             if (designerName.find("weapon"))
                 continue;
 
-            uintptr_t gameScene = Read<uintptr_t>(playerController + offset::m_pGameSceneNode);
+            auto gameScene = entityController->Gamescene();
 
-            Vector entityOrigin = Read<Vector>(gameScene + offset::m_vecAbsOrigin);
+            Vector entityOrigin = CWEntity::EntityPosition(gameScene);
 
             //cache info
             global.world.designerName = designerName;
@@ -177,8 +173,8 @@ void CEntityLoop::Bone()
         int bone1 = boneConnections[i].bone1;
         int bone2 = boneConnections[i].bone2;
 
-        Vector VectorBone1 = Read<Vector>(global.player.bonearray + bone1 * 32);
-        Vector VectorBone2 = Read<Vector>(global.player.bonearray + bone2 * 32);
+        Vector VectorBone1 = driver.Read<Vector>(global.player.bonearray + bone1 * 32);
+        Vector VectorBone2 = driver.Read<Vector>(global.player.bonearray + bone2 * 32);
 
         Vector b1;
         Vector b2;

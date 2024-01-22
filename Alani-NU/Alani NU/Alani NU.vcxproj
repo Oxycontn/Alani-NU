@@ -150,7 +150,10 @@
     <ClCompile Include="ext\ImGui\imgui_impl_win32.cpp" />
     <ClCompile Include="ext\ImGui\imgui_tables.cpp" />
     <ClCompile Include="ext\ImGui\imgui_widgets.cpp" />
+    <ClCompile Include="src\hacks\local.cpp" />
     <ClCompile Include="src\hacks\rcs.cpp" />
+    <ClCompile Include="src\hacks\wentity.cpp" />
+    <ClCompile Include="src\mem\memory.cpp" />
     <ClCompile Include="src\overlay\overlay.cpp" />
     <ClCompile Include="src\core\main.cpp" />
     <ClCompile Include="src\math\vector.cpp" />
@@ -178,7 +181,9 @@
     <ClInclude Include="ext\ImGui\imstb_truetype.h" />
     <ClInclude Include="src\classes\bone.hpp" />
     <ClInclude Include="src\classes\global.hpp" />
+    <ClInclude Include="src\hacks\local.h" />
     <ClInclude Include="src\hacks\rcs.h" />
+    <ClInclude Include="src\hacks\wentity.h" />
     <ClInclude Include="src\mem\memory.h" />
     <ClInclude Include="src\overlay\overlay.hpp" />
     <ClInclude Include="src\math\vector.hpp" />

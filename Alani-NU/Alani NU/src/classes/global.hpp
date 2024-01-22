@@ -6,13 +6,6 @@
 
 #include <string>
 
-//updates faster then aimpunch!
-struct aimPunchCache
-{
-	DWORD64 count = 0;
-	DWORD64 data = 0;
-};
-
 class CGlobals
 {
 public:

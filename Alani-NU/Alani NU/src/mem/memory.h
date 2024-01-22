@@ -17,74 +17,57 @@ typedef struct _NULL_MEMORY
 	ULONG64 baseAddress;
 }NULL_MEMORY;
 
-inline DWORD pid;
-
-inline DWORD GetProcesByName(const char* pName)
+class Driver
 {
-	DWORD pID = 0;
-	HANDLE snapShot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-	PROCESSENTRY32 pInfo;
-	pInfo.dwSize = sizeof(PROCESSENTRY32);
+public:
+	DWORD pid;
 
-	if (Process32First(snapShot, &pInfo))
+	inline ULONG64 GetDllBase(const char* moduleName)
 	{
-		while (Process32Next(snapShot, &pInfo))
-		{
-			if (_stricmp(pName, pInfo.szExeFile) == 0)
-			{
-				pID = pInfo.th32ProcessID;
-				return pID;
-				CloseHandle(snapShot);
-				break;
-			}
-		}
+		NULL_MEMORY instructions = { 0 };
+
+		instructions.pid = pid;
+		instructions.moduleName = moduleName;
+		instructions.requestBase = TRUE;
+
+		CallHook(&instructions);
+
+		uintptr_t base;
+		base = instructions.baseAddress;
+
+		return base;
 	}
-	CloseHandle(snapShot);
-	return 0;
-}
 
-template<typename ... Arg>
-inline int64_t CallHook(const Arg ... args)
-{
-	LoadLibrary(TEXT("user32.dll"));
+	template<class type>
+	inline type Read(uintptr_t ReadAddress)
+	{
+		type Buffer;
 
-	void* FunctionPTR = GetProcAddress(LoadLibrary(TEXT("win32u.dll")), "NtQueryCompositionSurfaceStatistics");
+		NULL_MEMORY instructions;
 
-	auto function = static_cast<uint64_t(_stdcall*)(Arg...)>(FunctionPTR);
+		instructions.pid = pid;
+		instructions.address = ReadAddress;
+		instructions.output = &Buffer;
+		instructions.size = sizeof(type);
+		instructions.read = TRUE;
 
-	return function(args ...);
-}
+		CallHook(&instructions);
 
-inline ULONG64 GetDllBase(const char* moduleName)
-{
-	NULL_MEMORY instructions = { 0 };
+		return Buffer;
+	}
 
-	instructions.pid = pid;
-	instructions.moduleName = moduleName;
-	instructions.requestBase = TRUE;
+	template<typename ... Arg>
+	int64_t CallHook(const Arg ... args)
+	{
+		LoadLibrary(TEXT("user32.dll"));
 
-	CallHook(&instructions);
+		void* FunctionPTR = GetProcAddress(LoadLibrary(TEXT("win32u.dll")), "NtQueryCompositionSurfaceStatistics");
 
-	uintptr_t base;
-	base = instructions.baseAddress;
+		auto function = static_cast<uint64_t(_stdcall*)(Arg...)>(FunctionPTR);
 
-	return base;
-}
+		return function(args ...);
+	}
 
-template<class type>
-inline type Read(uintptr_t ReadAddress)
-{
-	type Buffer;
-
-	NULL_MEMORY instructions;
-
-	instructions.pid = pid;
-	instructions.address = ReadAddress;
-	instructions.output = &Buffer;
-	instructions.size = sizeof(type);
-	instructions.read = TRUE;
-
-	CallHook(&instructions);
-
-	return Buffer;
-}
+	DWORD GetProcesByName(const char* pName);
+};
+inline Driver driver;

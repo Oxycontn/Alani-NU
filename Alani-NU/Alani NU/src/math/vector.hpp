@@ -30,6 +30,8 @@ struct Vector2
     constexpr const Vector2& operator/(const float factor) const noexcept;
     constexpr const Vector2& operator*(const float factor) const noexcept;
 
+    static void AimAtPos(float x, float y);
+
     float x, y;
 };
 
