@@ -1,8 +1,8 @@
 #pragma warning( disable : 4305 )
 
 #include "../math/vector.hpp"
-#include "../../ext/ImGui/imgui.h" //for ImVec4!
-#include "../overlay/overlay.hpp" //for rgb
+#include "../../ext/ImGui/imgui.h" 
+#include "../overlay/overlay.hpp" 
 
 #include <string>
 
@@ -194,23 +194,28 @@ public:
 		Vector entityOrigin;
 	};
 
+	struct threads_t
+	{
+		bool stopEsp = false;
+		bool stopAimbot = false;
+	};
+
 	features_t features;
 	modules_t modules;
 	player_t player;
 	local_t localPlayer;
 	world_t world;
+	threads_t threads;
 };
 inline CGlobals global;
 
 namespace offset 
 {
 	// player classes
-	constexpr std::ptrdiff_t dwEntityList = 0x17C26A0;
-	constexpr std::ptrdiff_t dwLocalPlayerController = 0x1811C98;
-	constexpr std::ptrdiff_t dwLocalPlayerPawn = 0x16C8F48;
-	constexpr std::ptrdiff_t dwViewMatrix = 0x1820EA0;
-	constexpr std::ptrdiff_t dwViewAngles = 0x1884F30;
-	constexpr std::ptrdiff_t dwSensitivity = 0x181FA98;
+	constexpr std::ptrdiff_t dwEntityList = 0x17CE6A0;
+	constexpr std::ptrdiff_t dwLocalPlayerController = 0x181DC98;
+	constexpr std::ptrdiff_t dwLocalPlayerPawn = 0x16D4F48;
+	constexpr std::ptrdiff_t dwViewMatrix = 0x182CEA0;
 
 	// engine2_dll
 	constexpr std::ptrdiff_t dwNetworkGameClient = 0x4E0988;

@@ -1,4 +1,4 @@
-#pragma warning( disable : 4005 )
+#pragma warning( disable : 4005 4018 4477 )
 
 #include "disable dse.h"
 #include "winsvc.h"

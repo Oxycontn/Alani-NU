@@ -54,7 +54,7 @@
     <ClCompile Include="src\hacks\rcs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\hacks\entity.cpp">
+    <ClCompile Include="src\entity\entity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ext\ImGui\imgui_plot.cpp">
@@ -66,10 +66,10 @@
     <ClCompile Include="src\mem\memory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\hacks\local.cpp">
+    <ClCompile Include="src\entity\local.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\hacks\wentity.cpp">
+    <ClCompile Include="src\entity\wentity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -137,7 +137,7 @@
     <ClInclude Include="src\hacks\rcs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\hacks\entity.h">
+    <ClInclude Include="src\entity\entity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ext\ImGui\imgui_plot.hpp">
@@ -152,10 +152,10 @@
     <ClInclude Include="src\mem\memory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\hacks\local.h">
+    <ClInclude Include="src\entity\local.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\hacks\wentity.h">
+    <ClInclude Include="src\entity\wentity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -18,23 +18,6 @@ struct view_matrix_t
     float matrix[4][4];
 };
 
-struct Vector2
-{
-    constexpr Vector2(
-        const float x = 0.0f,
-        const float y = 0.0f) noexcept :
-        x(x), y(y) { };
-
-    constexpr const Vector2& operator-(const Vector2& other) const noexcept;
-    constexpr const Vector2& operator+(const Vector2& other) const noexcept;
-    constexpr const Vector2& operator/(const float factor) const noexcept;
-    constexpr const Vector2& operator*(const float factor) const noexcept;
-
-    static void AimAtPos(float x, float y);
-
-    float x, y;
-};
-
 struct Vector
 {
     constexpr Vector(
@@ -57,4 +40,22 @@ struct Vector
     static Vector Normalize(Vector angle);
 
     float x, y, z;
+};
+
+struct Vector2
+{
+    constexpr Vector2(
+        const float x = 0.0f,
+        const float y = 0.0f) noexcept :
+        x(x), y(y) { };
+
+    constexpr const Vector2& operator-(const Vector2& other) const noexcept;
+    constexpr const Vector2& operator+(const Vector2& other) const noexcept;
+    constexpr const Vector2& operator/(const float factor) const noexcept;
+    constexpr const Vector2& operator*(const float factor) const noexcept;
+
+    static void AimAtPos(float x, float y);
+    static Vector2 AimbotAimCalculation(Vector bonePos, Vector localPos, Vector2 viewAngle, int fFlags);
+
+    float x, y;
 };

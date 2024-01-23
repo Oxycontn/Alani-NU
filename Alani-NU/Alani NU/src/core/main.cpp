@@ -1,4 +1,4 @@
-#pragma warning( disable : 4244 4312 4305 4005 )
+#pragma warning( disable : 4244 4312 4305 4005 4477 )
 
 #include <Windows.h>
 #include <iostream> // debug
@@ -9,32 +9,16 @@
 //for debug console
 #include "../overlay/overlay.hpp"
 
-//for threading
-#include "../hacks/entity.h" 
+//for threadings
 #include "../hacks/esp.h"
 #include "../hacks/aimbot.h"
-#include "../hacks/rcs.h"
 
-// read modules
+//read modules
 #include "../classes/global.hpp"
 #include "../mem/memory.h"
 
 //disableing DSE
 #include "..\dse\disable dse.h"
-
-BOOL WINAPI CtrlHandler(DWORD fdwCtrlType)
-{
-    switch (fdwCtrlType)
-    {
-    case CTRL_CLOSE_EVENT:
-        //if the user closes the debug console make sure to unload hook driver
-        dse.UnLoadHookDriver();
-        return TRUE;
-
-    default:
-        return FALSE;
-    }
-}
 
 void StartThreads()
 {
@@ -43,6 +27,27 @@ void StartThreads()
 
     EspThread.detach();
     AimbotThread.detach();
+}
+
+BOOL WINAPI CtrlHandler(DWORD fdwCtrlType)
+{
+    switch (fdwCtrlType)
+    {
+    case CTRL_CLOSE_EVENT:
+        //stop threads before unloading driver or a BSOD will occur cause of the driver not stopping pending operations
+        global.threads.stopAimbot = true;
+        global.threads.stopEsp = true;
+
+        //sleep for the threads to terminiate before unloading driver
+        Sleep(200);
+
+        //if the user closes the debug console make sure to unload hook driver
+        dse.UnLoadHookDriver();
+        return TRUE;
+
+    default:
+        return FALSE;
+    }
 }
 
 int main()
@@ -54,13 +59,11 @@ int main()
     debug.ShowConsole();
 
     //driver needs to be loaded before cs2 is open
-    /*
     if (FindWindow(NULL, "Counter-Strike 2") != NULL)
     {
         MessageBoxA(NULL, "CS2 Needs to be closed to load the driver Properly. Close CS2 and re-launch Alani-NU!", "Alani-NU", MB_OK | MB_ICONQUESTION);
         return 0;
     }
-    */
 
     //we need to disable DSE then we load the Driver!
     bool results = dse.LoadGigDriver();
@@ -128,10 +131,12 @@ int main()
     global.modules.client = driver.GetDllBase("client.dll");
     printf("[CS2]Cleint : %p\n", global.modules.client);
 
+    //start threads
     StartThreads();
 
     while(true)
     {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
         if (FindWindowW(NULL, L"Counter-Strike 2") == NULL)
             break;
         else
@@ -141,6 +146,13 @@ int main()
     //exit calls
     printf("[CS2]Exiting\n");
 
+    //stop threads before unloading driver or a BSOD will occur cause of the driver not stopping pending operations
+    global.threads.stopAimbot = true;
+    global.threads.stopEsp = true;
+
+    //sleep for the threads to terminiate before unloading driver
+    Sleep(200);
+
     //unload hook driver
     dse.UnLoadHookDriver();
 
@@ -148,6 +160,8 @@ int main()
     overlay.DestroyOverlay();
     overlay.DestroyImGui();
     overlay.DestroyOverlay();
+
+    system("pause");
 
 	return 0;
 }

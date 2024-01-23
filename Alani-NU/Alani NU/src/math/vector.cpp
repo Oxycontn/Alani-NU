@@ -1,3 +1,5 @@
+#pragma warning( disable : 4244 )
+
 #include "vector.hpp"
 #include <iostream>
 #include <algorithm>
@@ -181,4 +183,25 @@ void Vector2::AimAtPos(float x, float y)
         }
     }
     mouse_event(MOUSEEVENTF_MOVE, TargetX, TargetY, NULL, NULL);
+}
+
+Vector2 Vector2::AimbotAimCalculation(Vector bonePos, Vector localPos, Vector2 viewAngle, int fFlags)
+{
+    float yaw, pitch, distance, fov, deltaX, deltaY, deltaZ;
+
+    deltaX = bonePos.x - localPos.x;
+    deltaY = bonePos.y - localPos.y;
+
+    if (fFlags == 65667)
+        deltaZ = (bonePos.z - 43.f) - localPos.z;
+    else
+        deltaZ = (bonePos.z - 63.f) - localPos.z;
+
+    distance = sqrt(pow(deltaX, 2) + pow(deltaY, 2));
+    yaw = atan2f(deltaY, deltaX) * 180 / M_PI - viewAngle.y;
+    pitch = -atan(deltaZ / distance) * 180 / M_PI - viewAngle.x;
+
+    Vector2 aimPos{ pitch, yaw };
+
+    return aimPos;
 }

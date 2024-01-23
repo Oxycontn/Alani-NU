@@ -2,10 +2,10 @@
 
 #include "rcs.h"
 #include "..\classes\global.hpp"
-#include "entity.h"
+#include "..\entity\entity.h"
 #include "aimbot.h"
 #include "..\mem\memory.h"
-#include "local.h"
+#include "..\entity\local.h"
 
 void CRCS::RcsLoop()
 {

@@ -2,7 +2,7 @@
 
 ## Features
 
-Alani-Nu is a public cheat for CS2 that has been in the works for around 2 months. This cheat comes with several features and a nice clean menu.
+Alani-Nu is a private cheat for CS2 that has been in the works for around 2 months. This cheat comes with several features and a nice clean menu.
 
 ### Visuals
 

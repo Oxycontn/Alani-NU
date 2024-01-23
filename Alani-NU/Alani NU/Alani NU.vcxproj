@@ -140,7 +140,7 @@
   <ItemGroup>
     <ClCompile Include="ext\ImGui\imgui_plot.cpp" />
     <ClCompile Include="src\dse\disable dse.cpp" />
-    <ClCompile Include="src\hacks\entity.cpp" />
+    <ClCompile Include="src\entity\entity.cpp" />
     <ClCompile Include="src\hacks\aimbot.cpp" />
     <ClCompile Include="src\hacks\esp.cpp" />
     <ClCompile Include="ext\ImGui\imgui.cpp" />
@@ -150,9 +150,9 @@
     <ClCompile Include="ext\ImGui\imgui_impl_win32.cpp" />
     <ClCompile Include="ext\ImGui\imgui_tables.cpp" />
     <ClCompile Include="ext\ImGui\imgui_widgets.cpp" />
-    <ClCompile Include="src\hacks\local.cpp" />
+    <ClCompile Include="src\entity\local.cpp" />
     <ClCompile Include="src\hacks\rcs.cpp" />
-    <ClCompile Include="src\hacks\wentity.cpp" />
+    <ClCompile Include="src\entity\wentity.cpp" />
     <ClCompile Include="src\mem\memory.cpp" />
     <ClCompile Include="src\overlay\overlay.cpp" />
     <ClCompile Include="src\core\main.cpp" />
@@ -162,7 +162,7 @@
     <ClInclude Include="ext\ImGui\imgui_plot.hpp" />
     <ClInclude Include="src\classes\ntdll.h" />
     <ClInclude Include="src\dse\disable dse.h" />
-    <ClInclude Include="src\hacks\entity.h" />
+    <ClInclude Include="src\entity\entity.h" />
     <ClInclude Include="ext\Font\font.h" />
     <ClInclude Include="ext\Font\fonticons.h" />
     <ClInclude Include="ext\Font\fonticonsdata.h" />
@@ -181,9 +181,9 @@
     <ClInclude Include="ext\ImGui\imstb_truetype.h" />
     <ClInclude Include="src\classes\bone.hpp" />
     <ClInclude Include="src\classes\global.hpp" />
-    <ClInclude Include="src\hacks\local.h" />
+    <ClInclude Include="src\entity\local.h" />
     <ClInclude Include="src\hacks\rcs.h" />
-    <ClInclude Include="src\hacks\wentity.h" />
+    <ClInclude Include="src\entity\wentity.h" />
     <ClInclude Include="src\mem\memory.h" />
     <ClInclude Include="src\overlay\overlay.hpp" />
     <ClInclude Include="src\math\vector.hpp" />

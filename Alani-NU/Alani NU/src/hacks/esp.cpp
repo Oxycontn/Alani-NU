@@ -1,8 +1,8 @@
 #pragma warning( disable : 4244 4312 4305 )
 
-#include "entity.h"
-
 #include "esp.h"
+#include "..\entity\entity.h"
+
 #include "rcs.h"
 
 #include "../classes/global.hpp"
@@ -10,8 +10,8 @@
 #include "../classes/bone.hpp"
 #include "aimbot.h"
 #include "..\mem\memory.h"
-#include "local.h"
-#include "wentity.h"
+#include "..\entity\local.h"
+#include "..\entity\wentity.h"
 
 //esp
 void CEntityLoop::EspThread()
@@ -25,6 +25,9 @@ void CEntityLoop::EspThread()
     while (true)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+        if (global.threads.stopEsp)
+            std::terminate();
 
         overlay.StartRender();
 
@@ -60,7 +63,7 @@ void CEntityLoop::ReadLocalPlayer()
     int localTeam = localPlayerPawn->Team();
     int health = localPlayerPawn->Health();
 
-    char weaponName = localPlayerPawn->GetWeaponNameLocal();
+    std::string weaponName = localPlayerPawn->GetWeaponNameLocal();
 
     Vector position = localPlayerPawn->Position();
 
@@ -117,8 +120,8 @@ void CEntityLoop::EspLoop()
             head.y = readFeet.y;
             head.z = readFeet.z + 75.f;
 
-            char playerName = CEntity::GetPlayerName(playerController);
-            char weaponName = pCSPlayerPawn->GetWeaponName();
+            std::string playerName = CEntity::GetPlayerName(playerController);
+            std::string weaponName = pCSPlayerPawn->GetWeaponName();
 
             global.player.health = health;
             global.player.team = playerTeam; 

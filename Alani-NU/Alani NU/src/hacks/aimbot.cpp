@@ -2,18 +2,21 @@
 
 #include "aimbot.h"
 #include "..\classes\global.hpp"
-#include "entity.h"
+#include "..\entity\entity.h"
 #include "esp.h"
 #include "..\classes\bone.hpp"
 #include "rcs.h"
 #include "..\mem\memory.h"
-#include "local.h"
+#include "..\entity\local.h"
 
 void CAimbot::AimbotThread()
 {
     while (true)
     {
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+		if (global.threads.stopAimbot)
+			std::terminate();
 
         AimbotLoop();
 
@@ -27,14 +30,10 @@ void CAimbot::AimbotLoop()
 
 	for (int i = 1; i < 64; ++i)
 	{
+		//entity varibles
 		auto playerController = CEntity::GetPlayerController(entityList, global.localPlayer.localPlayerController, i);
 
 		auto pCSPlayerPawn = CEntity::GetpCSPlayerPawn(entityList, playerController, i);
-
-		int health = pCSPlayerPawn->Health();
-
-		if (health <= 0 || health > 100)
-			continue;
 
 		int playerTeam = pCSPlayerPawn->Team();
 
@@ -45,6 +44,7 @@ void CAimbot::AimbotLoop()
 		uintptr_t bonearray = pCSPlayerPawn->Bonearray();
 		Vector playerPos = pCSPlayerPawn->Feet(bonearray);
 
+		//local player varibles
 		std::string weaponName = global.localPlayer.weaponName;
 
 		auto localPlayerPawn = CLocal::GetLocalPawn();
@@ -58,42 +58,31 @@ void CAimbot::AimbotLoop()
 
 		Vector bonePos = AimbotBone(weaponName, bonearray);
 
-		float yaw, pitch, distance, fov, deltaX, deltaY, deltaZ;
-		float distanceX, distanceY, realDistance; 
+		//calculations
+		Vector2 aimPos = Vector2::AimbotAimCalculation(bonePos, localPos, viewAngle, fFlags);
+		float pitch = aimPos.x;
+		float yaw = aimPos.y;
 
-		deltaX = bonePos.x - localPos.x;
-		deltaY = bonePos.y - localPos.y;
+		float distance = localPos.CalculateDistance(playerPos);
 
-		if(fFlags == 65667)
-			deltaZ = (bonePos.z - 43.f) - localPos.z;
-		else
-			deltaZ = (bonePos.z - 63.f) - localPos.z;
+		float fov = sqrt(pow(yaw, 2) + pow(pitch, 2));
 
-		distance = sqrt(pow(deltaX, 2) + pow(deltaY, 2));
-		yaw = atan2f(deltaY, deltaX) * 180 / M_PI - viewAngle.y;
-		pitch = -atan(deltaZ / distance) * 180 / M_PI - viewAngle.x;
-
-		distanceX = localPos.x - playerPos.x;
-		distanceY = localPos.y - playerPos.y;
-		realDistance = sqrt(pow(distanceX, 2) + pow(distanceY, 2));
-
-		fov = sqrt(pow(yaw, 2) + pow(pitch, 2));
-
+		//settings
 		bool aimbotEnable = AimbotEnable(weaponName);
 		float aimbotFov = AimbotFov(weaponName);
+
 		bool aimbotVisable = AimbotVisable(weaponName);
 		int vKey = AimbotKey(weaponName);
+
 		bool aimbotAuto = AimbotAutoshoot(weaponName);
 		float aimbotSmooth = AimbotSmooth(weaponName);
+
 		float aimbotDistance = AimbotDistance(weaponName);
 		int aimbotSleep = AimbotAutoSleep(weaponName);
 
-		fov -= (distance * -1) / (aimbotFov + distance);
-		aimbotFov /= 7.f;
-
 		if (aimbotEnable)
 		{
-			if (aimbotFov >= fov && aimbotDistance >= realDistance && ammo != 0)
+			if (aimbotFov >= fov && aimbotDistance >= distance && ammo != 0)
 			{
 				showBoneAngle = true;
 				aimbotRCS = true;
@@ -145,6 +134,9 @@ void CAimbot::AimbotLoop()
 
 					Angle = Vector::Normalize(Angle);
 
+					pitch = Angle.x;
+					yaw = Angle.y;
+
 					if (aimbotVisable)
 					{
 						if (spottedState)
@@ -162,6 +154,7 @@ void CAimbot::AimbotLoop()
 					{
 						if (aimbotAuto)
 						{
+							Vector2::AimAtPos(pitch, yaw);
 							mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
 							mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
 							Sleep(aimbotSleep);
