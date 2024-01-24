@@ -109,7 +109,10 @@ int main()
             return 0;
     }
     else
+    {
+	printf("[GDRV]Failed to load Gigabyte Driver\n");
         return 0;
+    }
 
     //now since the driver is loaded open up cs2!
     printf("[CS2]You may now load CS2\n");
