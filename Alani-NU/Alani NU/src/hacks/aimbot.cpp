@@ -26,7 +26,7 @@ void CAimbot::AimbotThread()
 
 void CAimbot::AimbotLoop()
 {
-	uintptr_t entityList = global.player.dwEntityList;
+	uintptr_t entityList = CEntity::GetEntityList();
 
 	for (int i = 1; i < 64; ++i)
 	{
@@ -34,6 +34,11 @@ void CAimbot::AimbotLoop()
 		auto playerController = CEntity::GetPlayerController(entityList, global.localPlayer.localPlayerController, i);
 
 		auto pCSPlayerPawn = CEntity::GetpCSPlayerPawn(entityList, playerController, i);
+
+		int health = pCSPlayerPawn->Health();
+
+		if (health <= 0 || health > 100)
+			continue;
 
 		int playerTeam = pCSPlayerPawn->Team();
 
@@ -45,6 +50,7 @@ void CAimbot::AimbotLoop()
 		Vector playerPos = pCSPlayerPawn->Feet(bonearray);
 
 		//local player varibles
+		view_matrix_t viewMatrix = global.localPlayer.vm;
 		std::string weaponName = global.localPlayer.weaponName;
 
 		auto localPlayerPawn = CLocal::GetLocalPawn();
@@ -56,6 +62,7 @@ void CAimbot::AimbotLoop()
 		int shotsFired = localPlayerPawn->ShotsFired();
 		auto fFlags = localPlayerPawn->Flags();
 
+		Vector2 eyePos = localPlayerPawn->EyePosition();
 		Vector bonePos = AimbotBone(weaponName, bonearray);
 
 		//calculations
@@ -64,8 +71,7 @@ void CAimbot::AimbotLoop()
 		float yaw = aimPos.y;
 
 		float distance = localPos.CalculateDistance(playerPos);
-
-		float fov = sqrt(pow(yaw, 2) + pow(pitch, 2));
+		float fov = Vector2::AimbotFovCalculation(aimPos, eyePos);
 
 		//settings
 		bool aimbotEnable = AimbotEnable(weaponName);
@@ -87,7 +93,7 @@ void CAimbot::AimbotLoop()
 				showBoneAngle = true;
 				aimbotRCS = true;
 
-				Vector::WTS(global.localPlayer.vm, bonePos, boneAngle);
+				Vector::WTS(viewMatrix, bonePos, boneAngle);
 
 				if (GetAsyncKeyState(vKey))
 				{
@@ -123,27 +129,17 @@ void CAimbot::AimbotLoop()
 						}
 					}
 
-					pitch -= viewAngle.x;
-					yaw -= viewAngle.y;
-					pitch = pitch * aimbotSmooth + viewAngle.x;
-					yaw = yaw * aimbotSmooth + viewAngle.y;
+					aimbotSmooth *= 150;
 
-					Vector Angle{ pitch, yaw, 0.0f };
-
-					Angle = Vector::Clamp(Angle);
-
-					Angle = Vector::Normalize(Angle);
-
-					pitch = Angle.x;
-					yaw = Angle.y;
+					Vector2 screenOffset = Vector2::AngleToScreenOffset(yaw, pitch, viewAngle.y, viewAngle.x, aimbotSmooth);
 
 					if (aimbotVisable)
 					{
 						if (spottedState)
 						{
+							mouse_event(MOUSEEVENTF_MOVE, static_cast<DWORD>(screenOffset.x), static_cast<DWORD>(screenOffset.y), 0, 0);
 							if (aimbotAuto)
 							{
-								Vector2::AimAtPos(pitch, yaw);
 								mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
 								mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
 								Sleep(aimbotSleep);
@@ -152,9 +148,9 @@ void CAimbot::AimbotLoop()
 					}
 					else
 					{
+						mouse_event(MOUSEEVENTF_MOVE, static_cast<DWORD>(screenOffset.x), static_cast<DWORD>(screenOffset.y), 0, 0);
 						if (aimbotAuto)
 						{
-							Vector2::AimAtPos(pitch, yaw);
 							mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
 							mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
 							Sleep(aimbotSleep);

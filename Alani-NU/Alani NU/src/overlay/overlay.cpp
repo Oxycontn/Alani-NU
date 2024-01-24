@@ -1359,7 +1359,7 @@ void Menu::AimbotMenu()
                 }
                 ImGui::Spacing();
                 ImGui::Spacing();
-                ImGui::SliderFloat("smooth", &global.features.ARaimbotsmooth, 0.001, 1);
+                ImGui::SliderFloat("smooth", &global.features.ARaimbotsmooth, 0.3, 1.1);
                 ImGui::SliderInt("distance", &global.features.ARaimbotdistance, 100, 2000);
                 ImGui::Checkbox("autoshot", &global.features.ARaimbotautoshot);
                 ImGui::Spacing();
@@ -1392,7 +1392,7 @@ void Menu::AimbotMenu()
                 }
                 ImGui::Spacing();
                 ImGui::Spacing();
-                ImGui::SliderFloat("smooth", &global.features.SGaimbotsmooth, 0.001, 1);
+                ImGui::SliderFloat("smooth", &global.features.SGaimbotsmooth, 0.3, 1.1);
                 ImGui::SliderInt("distance", &global.features.SGaimbotdistance, 100, 2000);
                 ImGui::Checkbox("autoshot", &global.features.SGaimbotautoshot);
                 ImGui::Spacing();
@@ -1425,7 +1425,7 @@ void Menu::AimbotMenu()
                 }
                 ImGui::Spacing();
                 ImGui::Spacing();
-                ImGui::SliderFloat("smooth", &global.features.PSaimbotsmooth, 0.001, 1);
+                ImGui::SliderFloat("smooth", &global.features.PSaimbotsmooth, 0.3, 1.1);
                 ImGui::SliderInt("distance", &global.features.PSaimbotdistance, 100, 2000);
                 ImGui::Checkbox("autoshot", &global.features.PSaimbotautoshot);
                 ImGui::Spacing();
@@ -1458,7 +1458,7 @@ void Menu::AimbotMenu()
                 }
                 ImGui::Spacing();
                 ImGui::Spacing();
-                ImGui::SliderFloat("smooth", &global.features.SRaimbotsmooth, 0.001, 1);
+                ImGui::SliderFloat("smooth", &global.features.SRaimbotsmooth, 0.3, 1.1);
                 ImGui::SliderInt("distance", &global.features.SRaimbotdistance, 100, 2000);
                 ImGui::Checkbox("autoshot", &global.features.SRaimbotautoshot);
                 ImGui::Spacing();
@@ -1491,7 +1491,7 @@ void Menu::AimbotMenu()
                 }
                 ImGui::Spacing();
                 ImGui::Spacing();
-                ImGui::SliderFloat("smooth", &global.features.SMGaimbotsmooth, 0.001, 1);
+                ImGui::SliderFloat("smooth", &global.features.SMGaimbotsmooth, 0.3, 1.1);
                 ImGui::SliderInt("distance", &global.features.SMGaimbotdistance, 100, 2000);
                 ImGui::Checkbox("autoshot", &global.features.SMGaimbotautoshot);
                 ImGui::Spacing();

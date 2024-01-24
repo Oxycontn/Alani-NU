@@ -333,6 +333,7 @@ bool DSE::LoadHookDriver()
 		else
 			results = TRUE;
 	}
+	results = TRUE;
 
 	CloseServiceHandle(hServiceDDK);
 	CloseServiceHandle(hServiceMgr);

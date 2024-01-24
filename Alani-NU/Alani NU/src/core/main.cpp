@@ -37,7 +37,7 @@ BOOL WINAPI CtrlHandler(DWORD fdwCtrlType)
         //stop threads before unloading driver or a BSOD will occur cause of the driver not stopping pending operations
         global.threads.stopAimbot = true;
         global.threads.stopEsp = true;
-
+        printf("[Console]Console Closing\n");
         //sleep for the threads to terminiate before unloading driver
         Sleep(200);
 
@@ -110,7 +110,7 @@ int main()
     }
     else
     {
-	printf("[GDRV]Failed to load Gigabyte Driver\n");
+        printf("[GDRV]Failed to load Gigabyte Driver\n");
         return 0;
     }
 
@@ -122,12 +122,13 @@ int main()
     while (FindWindowW(NULL, L"Counter-Strike 2") == NULL)
         continue;
 
+    printf("[CS2]Waiting for CS2 to load\n");
+
+    Sleep(4000);
 
     //get pid and call for dlls
     driver.pid = driver.GetProcesByName("cs2.exe");
     printf("[CS2]PID : %d\n", driver.pid);
-
-    Sleep(4000);
 
     global.modules.engine = driver.GetDllBase("engine2.dll");
     printf("[CS2]Engine : %p\n", global.modules.engine);

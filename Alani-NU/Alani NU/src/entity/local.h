@@ -27,6 +27,7 @@ public:
 	int ShotsFired() const noexcept;
 	int Flags() const noexcept;
 	aimPunchCache AimPunch() const noexcept;
+	Vector2 EyePosition() const noexcept;
 
 private:
 	uintptr_t localPlayerPawn;

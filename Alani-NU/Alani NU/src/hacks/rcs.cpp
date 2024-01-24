@@ -25,21 +25,15 @@ void CRCS::RcsLoop()
 
 				Vector2 aimPunch = CLocal::AimPunchAngle(aimpunchCache);
 
-				if (!aimPunch.x && !aimPunch.y)
+				if (!aimPunch.x || !aimPunch.y)
 					return;
 
 				newAngle.x = ((viewAngles.x + oldAngle.x) - (aimPunch.x * global.features.rcsscaleX));
 				newAngle.y = ((viewAngles.y + oldAngle.y) - (aimPunch.y * global.features.rcsscaleY));
 				newAngle.z = 0.0f;
 
-				newAngle = Vector::Clamp(newAngle);
-
-				newAngle = Vector::Normalize(newAngle);
-
-				if (newAngle.x == 0)
-					return;
-
-				//mem.Write<Vector>(global.modules.client + offset::dwViewAngles, newAngle);
+				Vector2 screenOffset = Vector2::AngleToScreenOffset(newAngle.y, newAngle.x, viewAngles.y, viewAngles.x, 40.f);
+				mouse_event(MOUSEEVENTF_MOVE, static_cast<DWORD>(screenOffset.x), static_cast<DWORD>(screenOffset.y), 0, 0);
 
 				oldAngle.x = aimPunch.x * global.features.rcsscaleX;
 				oldAngle.y = aimPunch.y * global.features.rcsscaleY;

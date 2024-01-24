@@ -86,3 +86,8 @@ Vector2 CLocal::AimPunchAngle(aimPunchCache AimPunch)
 {
 	return driver.Read<Vector2>(AimPunch.data + (AimPunch.count - 1) * sizeof(Vector));
 }
+
+Vector2 CLocal::EyePosition() const noexcept
+{
+	return driver.Read<Vector2>(localPlayerPawn + 0x1518);
+}

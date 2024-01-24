@@ -62,28 +62,6 @@ float Vector::CalculateDistance(const Vector& point)
     return sqrt(pow(dx, 2) + pow(dy, 2));
 }
 
-Vector Vector::Clamp(Vector angle)
-{
-    Vector clamped;
-
-    clamped.x = std::clamp(angle.x, -89.0f, 89.0f);
-    clamped.y = std::clamp(angle.y, -180.0f, 180.0f);
-    clamped.z = 0.0f;
-
-    return clamped;
-}
-
-Vector Vector::Normalize(Vector angle)
-{
-    Vector normalized;
-
-    normalized.x = std::fmod(angle.x + 180.0f, 360.0f) - 180.0f;
-    normalized.y = std::fmod(angle.y + 180.0f, 360.0f) - 180.0f;
-    normalized.z = 0.0f;
-
-    return normalized;
-}
-
 // ================================================
 // Vector 2
 // ================================================
@@ -108,83 +86,6 @@ constexpr const Vector2& Vector2::operator*(const float factor) const noexcept
     return Vector2{ x * factor, y * factor };
 }
 
-void Vector2::AimAtPos(float x, float y)
-{
-    int width = GetSystemMetrics(SM_CXSCREEN);
-    int height = GetSystemMetrics(SM_CYSCREEN);
-    int ScreenCenterY = height * 0.5f;
-    int ScreenCenterX = width * 0.5f;
-
-    float AimSpeed = 5;
-    float TargetX = 0;
-    float TargetY = 0;
-
-    //X Axis
-    if (x != 0)
-    {
-        if (x > ScreenCenterX)
-        {
-            TargetX = -(ScreenCenterX - x);
-            TargetX /= AimSpeed;
-            if (TargetX + ScreenCenterX > ScreenCenterX * 2) TargetX = 0;
-        }
-
-        if (x < ScreenCenterX)
-        {
-            TargetX = x - ScreenCenterX;
-            TargetX /= AimSpeed;
-            if (TargetX + ScreenCenterX < 0) TargetX = 0;
-        }
-    }
-
-    //Y Axis
-
-    if (y != 0)
-    {
-        if (y > ScreenCenterY)
-        {
-            TargetY = -(ScreenCenterY - y);
-            TargetY /= AimSpeed;
-            if (TargetY + ScreenCenterY > ScreenCenterY * 2) TargetY = 0;
-        }
-
-        if (y < ScreenCenterY)
-        {
-            TargetY = y - ScreenCenterY;
-            TargetY /= AimSpeed;
-            if (TargetY + ScreenCenterY < 0) TargetY = 0;
-        }
-    }
-
-    TargetX /= 10;
-    TargetY /= 10;
-
-    //Mouse even't will round to 0 a lot of the time, so we can add this, to make it more accurrate on slow speeds.
-    if (fabs(TargetX) < 1)
-    {
-        if (TargetX > 0)
-        {
-            TargetX = 1;
-        }
-        if (TargetX < 0)
-        {
-            TargetX = -1;
-        }
-    }
-    if (fabs(TargetY) < 1)
-    {
-        if (TargetY > 0)
-        {
-            TargetY = 1;
-        }
-        if (TargetY < 0)
-        {
-            TargetY = -1;
-        }
-    }
-    mouse_event(MOUSEEVENTF_MOVE, TargetX, TargetY, NULL, NULL);
-}
-
 Vector2 Vector2::AimbotAimCalculation(Vector bonePos, Vector localPos, Vector2 viewAngle, int fFlags)
 {
     float yaw, pitch, distance, fov, deltaX, deltaY, deltaZ;
@@ -204,4 +105,31 @@ Vector2 Vector2::AimbotAimCalculation(Vector bonePos, Vector localPos, Vector2 v
     Vector2 aimPos{ pitch, yaw };
 
     return aimPos;
+}
+
+float Vector2::AimbotFovCalculation(Vector2 targetPos, Vector2 eyePos)
+{
+    float fov;
+
+    Vector2 delta = targetPos - eyePos;
+
+    fov = sqrt(pow(delta.x, 2) + pow(delta.y, 2));
+
+    return fov * 2.5;
+}
+
+Vector2 Vector2::AngleToScreenOffset(float angleX, float angleY, float previousX, float previousY, float fov)
+{
+    int width = GetSystemMetrics(SM_CXSCREEN);
+    int height = GetSystemMetrics(SM_CYSCREEN);
+
+    float fovRad = fov * (M_PI / 180.0f);
+
+    double thetaX = (angleX - previousX) * (M_PI / 180.0f);
+    double offsetX = (width * tan(thetaX)) / (2 * tan(fovRad / 2));
+
+    double thetaY = (angleY - previousY) * (M_PI / 180.0f);
+    double offsetY = (height * tan(thetaY)) / (2 * tan(fovRad / 2));
+
+    return Vector2(-offsetX, offsetY);
 }

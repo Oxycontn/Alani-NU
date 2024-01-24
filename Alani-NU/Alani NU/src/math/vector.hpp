@@ -36,8 +36,6 @@ struct Vector
     // like you define it in vector.hpp, i get you may spell it wrong there but how do you not notice in .cpp??
     // if you do notice but just dont change it, come on man
     float CalculateDistance(const Vector& point);
-    static Vector Clamp(Vector angle);
-    static Vector Normalize(Vector angle);
 
     float x, y, z;
 };
@@ -54,8 +52,9 @@ struct Vector2
     constexpr const Vector2& operator/(const float factor) const noexcept;
     constexpr const Vector2& operator*(const float factor) const noexcept;
 
-    static void AimAtPos(float x, float y);
     static Vector2 AimbotAimCalculation(Vector bonePos, Vector localPos, Vector2 viewAngle, int fFlags);
+    static float AimbotFovCalculation(Vector2 targetPos, Vector2 eyePos);
+    static Vector2 AngleToScreenOffset(float angleX, float angleY, float previousX, float previousY, float fov);
 
     float x, y;
 };
