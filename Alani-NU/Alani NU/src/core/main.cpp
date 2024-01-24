@@ -127,7 +127,7 @@ int main()
     driver.pid = driver.GetProcesByName("cs2.exe");
     printf("[CS2]PID : %d\n", driver.pid);
 
-    Sleep(2000);
+    Sleep(4000);
 
     global.modules.engine = driver.GetDllBase("engine2.dll");
     printf("[CS2]Engine : %p\n", global.modules.engine);
