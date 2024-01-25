@@ -160,7 +160,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="gdrv.sys" />
     <None Include="HookDriver.sys" />
+    <None Include="gdrv.sys" />
   </ItemGroup>
 </Project>

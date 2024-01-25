@@ -83,22 +83,22 @@ int main()
         PVOID g_CiOptionAddress = 0;
         NTSTATUS status = dse.FinalCalculation(&g_CiOptionAddress);
         if (!NT_SUCCESS(status))
-            return 0;
+            goto GoToPause;
 
         //now we can disable dse and load our driver!
         status = dse.DisableDSE(g_CiOptionAddress, ghDriver);
         if (!NT_SUCCESS(status))
-            return 0;
+            goto GoToPause;
 
         //now load hook driver
         results = dse.LoadHookDriver();
         if (!results)
-            return 0;
+            goto GoToPause;
 
         //now enable dse
         status = dse.EnableDSE(g_CiOptionAddress, ghDriver);
         if (!NT_SUCCESS(status))
-            return 0;
+            goto GoToPause;
 
         //close handle to gig driver
         CloseHandle(ghDriver);
@@ -106,12 +106,12 @@ int main()
         //unload gig driver
         results = dse.UnLoadGigDriver();
         if (!results)
-            return 0;
+            goto GoToPause;
     }
     else
     {
         printf("[GDRV]Failed to load Gigabyte Driver\n");
-        return 0;
+        goto GoToPause;
     }
 
     //now since the driver is loaded open up cs2!
@@ -168,4 +168,8 @@ int main()
     system("pause");
 
 	return 0;
+
+GoToPause:
+    system("pause");
+    return 0;
 }

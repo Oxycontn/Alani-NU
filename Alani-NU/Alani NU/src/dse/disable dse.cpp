@@ -2,6 +2,7 @@
 
 #include "disable dse.h"
 #include "winsvc.h"
+#include <atlstr.h>
 
 bool DSE::LoadGigDriver()
 {
@@ -22,7 +23,7 @@ bool DSE::LoadGigDriver()
 		results = FALSE;
 	}
 
-	SC_HANDLE hServiceDDK = CreateService(hServiceMgr, "driver1", "driver1", SERVICE_ALL_ACCESS, SERVICE_KERNEL_DRIVER, SERVICE_DEMAND_START, SERVICE_ERROR_IGNORE, szDriverImagePath, NULL, NULL, NULL, NULL, NULL);
+	SC_HANDLE hServiceDDK = CreateService(hServiceMgr, "Gigabytedriver", "Gigabytedriver", SERVICE_ALL_ACCESS, SERVICE_KERNEL_DRIVER, SERVICE_DEMAND_START, SERVICE_ERROR_IGNORE, szDriverImagePath, NULL, NULL, NULL, NULL, NULL);
 
 	if (!hServiceDDK)
 	{
@@ -32,7 +33,7 @@ bool DSE::LoadGigDriver()
 			results = FALSE;
 		}
 
-		hServiceDDK = OpenService(hServiceMgr, "driver1", SERVICE_ALL_ACCESS);
+		hServiceDDK = OpenService(hServiceMgr, "Gigabytedriver", SERVICE_ALL_ACCESS);
 		if (!hServiceDDK)
 		{
 			printf("[GDRV]OpenService Failed %d\n", GetLastError());
@@ -304,7 +305,7 @@ bool DSE::LoadHookDriver()
 		results = FALSE;
 	}
 
-	SC_HANDLE hServiceDDK = CreateService(hServiceMgr,"driver2", "driver2", SERVICE_ALL_ACCESS, SERVICE_KERNEL_DRIVER, SERVICE_DEMAND_START, SERVICE_ERROR_IGNORE, szDriverImagePath, NULL, NULL, NULL, NULL, NULL);
+	SC_HANDLE hServiceDDK = CreateService(hServiceMgr,"Hookdriver", "Hookdriver", SERVICE_ALL_ACCESS, SERVICE_KERNEL_DRIVER, SERVICE_DEMAND_START, SERVICE_ERROR_IGNORE, szDriverImagePath, NULL, NULL, NULL, NULL, NULL);
 
 	if (!hServiceDDK)
 	{
@@ -314,7 +315,7 @@ bool DSE::LoadHookDriver()
 			results = FALSE;
 		}
 
-		hServiceDDK = OpenService(hServiceMgr, "driver2", SERVICE_ALL_ACCESS);
+		hServiceDDK = OpenService(hServiceMgr, "Hookdriver", SERVICE_ALL_ACCESS);
 		if (!hServiceDDK)
 		{
 			printf("[Hook]OpenService Failed %d\n", GetLastError());
@@ -333,7 +334,6 @@ bool DSE::LoadHookDriver()
 		else
 			results = TRUE;
 	}
-	results = TRUE;
 
 	CloseServiceHandle(hServiceDDK);
 	CloseServiceHandle(hServiceMgr);
@@ -383,7 +383,7 @@ bool DSE::UnLoadGigDriver()
 		results = FALSE;
 	}
 
-	SC_HANDLE hServiceDDK = OpenService(hServiceMgr, "driver1", SERVICE_ALL_ACCESS);
+	SC_HANDLE hServiceDDK = OpenService(hServiceMgr, "Gigabytedriver", SERVICE_ALL_ACCESS);
 	if (!hServiceDDK)
 	{
 		printf("[GDRV]OpenService Failed %d\n", GetLastError());
@@ -422,7 +422,7 @@ bool DSE::UnLoadHookDriver()
 		results = FALSE;
 	}
 
-	SC_HANDLE hServiceDDK = OpenService(hServiceMgr, "driver2", SERVICE_ALL_ACCESS);
+	SC_HANDLE hServiceDDK = OpenService(hServiceMgr, "Hookdriver", SERVICE_ALL_ACCESS);
 	if (!hServiceDDK)
 	{
 		printf("[Hook]OpenService Failed %d\n", GetLastError());
