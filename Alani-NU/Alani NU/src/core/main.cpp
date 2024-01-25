@@ -38,10 +38,10 @@ BOOL WINAPI CtrlHandler(DWORD fdwCtrlType)
         global.threads.stopAimbot = true;
         global.threads.stopEsp = true;
         printf("[Console]Console Closing\n");
+
         //sleep for the threads to terminiate before unloading driver
         Sleep(200);
 
-        //if the user closes the debug console make sure to unload hook driver
         dse.UnLoadHookDriver();
         return TRUE;
 

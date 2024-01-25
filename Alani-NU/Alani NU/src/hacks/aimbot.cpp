@@ -30,6 +30,9 @@ void CAimbot::AimbotLoop()
 
 	for (int i = 1; i < 64; ++i)
 	{
+		if (overlay.RenderMenu)
+			continue;
+
 		//entity varibles
 		auto playerController = CEntity::GetPlayerController(entityList, global.localPlayer.localPlayerController, i);
 
@@ -71,7 +74,6 @@ void CAimbot::AimbotLoop()
 		float yaw = aimPos.y;
 
 		float distance = localPos.CalculateDistance(playerPos);
-		float fov = Vector2::AimbotFovCalculation(aimPos, eyePos);
 
 		//settings
 		bool aimbotEnable = AimbotEnable(weaponName);
@@ -85,6 +87,8 @@ void CAimbot::AimbotLoop()
 
 		float aimbotDistance = AimbotDistance(weaponName);
 		int aimbotSleep = AimbotAutoSleep(weaponName);
+
+		float fov = Vector2::AimbotFovCalculation(aimPos, distance, aimbotFov);
 
 		if (aimbotEnable)
 		{

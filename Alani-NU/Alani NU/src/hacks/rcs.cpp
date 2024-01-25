@@ -32,7 +32,7 @@ void CRCS::RcsLoop()
 				newAngle.y = ((viewAngles.y + oldAngle.y) - (aimPunch.y * global.features.rcsscaleY));
 				newAngle.z = 0.0f;
 
-				Vector2 screenOffset = Vector2::AngleToScreenOffset(newAngle.y, newAngle.x, viewAngles.y, viewAngles.x, 40.f);
+				Vector2 screenOffset = Vector2::AngleToScreenOffset(newAngle.y, newAngle.x, viewAngles.y, viewAngles.x, 30.f);
 				mouse_event(MOUSEEVENTF_MOVE, static_cast<DWORD>(screenOffset.x), static_cast<DWORD>(screenOffset.y), 0, 0);
 
 				oldAngle.x = aimPunch.x * global.features.rcsscaleX;

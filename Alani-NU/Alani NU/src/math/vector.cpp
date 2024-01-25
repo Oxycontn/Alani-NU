@@ -107,15 +107,18 @@ Vector2 Vector2::AimbotAimCalculation(Vector bonePos, Vector localPos, Vector2 v
     return aimPos;
 }
 
-float Vector2::AimbotFovCalculation(Vector2 targetPos, Vector2 eyePos)
+float DEG2RAD(float degree)
 {
-    float fov;
+    return degree * (M_PI / 180);
+}
 
-    Vector2 delta = targetPos - eyePos;
+float Vector2::AimbotFovCalculation(Vector2 aimPos, float distance, float aimbotFov)
+{
+    float fov = sqrt(pow(aimPos.x, 2) + pow(aimPos.y, 2));
 
-    fov = sqrt(pow(delta.x, 2) + pow(delta.y, 2));
+    fov -= (distance * -1) / (aimbotFov + distance);
 
-    return fov * 2.5;
+    return fov * 6;
 }
 
 Vector2 Vector2::AngleToScreenOffset(float angleX, float angleY, float previousX, float previousY, float fov)

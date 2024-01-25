@@ -53,7 +53,7 @@ struct Vector2
     constexpr const Vector2& operator*(const float factor) const noexcept;
 
     static Vector2 AimbotAimCalculation(Vector bonePos, Vector localPos, Vector2 viewAngle, int fFlags);
-    static float AimbotFovCalculation(Vector2 targetPos, Vector2 eyePos);
+    static float AimbotFovCalculation(Vector2 aimPos, float distance, float aimbotFov);
     static Vector2 AngleToScreenOffset(float angleX, float angleY, float previousX, float previousY, float fov);
 
     float x, y;
