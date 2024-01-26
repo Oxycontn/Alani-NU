@@ -78,9 +78,9 @@ public:
 
 		//AR
 		bool ARaimbotenable;
-		float ARaimbotfov = 6.0f;
-		float ARaimbotsmooth = 0.24;
-		int ARaimbotdistance = 300;
+		float ARaimbotfov;
+		float ARaimbotsmooth;;
+		int ARaimbotdistance;
 		int ARaimbotcombobone;
 		int ARaimbotcombokey;
 		bool ARaimbotautoshot;
@@ -90,9 +90,9 @@ public:
 
 		//SMG
 		bool SMGaimbotenable;
-		float SMGaimbotfov = 6.0f;
-		float SMGaimbotsmooth = 0.24;
-		int SMGaimbotdistance = 300;
+		float SMGaimbotfov;
+		float SMGaimbotsmooth;
+		int SMGaimbotdistance;
 		int SMGaimbotcombobone;
 		int SMGaimbotcombokey;
 		bool SMGaimbotautoshot;
@@ -102,9 +102,9 @@ public:
 
 		//SR
 		bool SRaimbotenable;
-		float SRaimbotfov = 6.0f;
-		float SRaimbotsmooth = 0.24;
-		int SRaimbotdistance = 300;
+		float SRaimbotfov;
+		float SRaimbotsmooth;
+		int SRaimbotdistance;
 		int SRaimbotcombobone;
 		int SRaimbotcombokey;
 		bool SRaimbotautoshot;
@@ -114,9 +114,9 @@ public:
 
 		//SG
 		bool SGaimbotenable;
-		float SGaimbotfov = 6.0f;
-		float SGaimbotsmooth = 0.24;
-		int SGaimbotdistance = 300;
+		float SGaimbotfov;
+		float SGaimbotsmooth;
+		int SGaimbotdistance;
 		int SGaimbotcombobone;
 		int SGaimbotcombokey;
 		bool SGaimbotautoshot;
@@ -126,9 +126,9 @@ public:
 
 		//PS
 		bool PSaimbotenable;
-		float PSaimbotfov = 6.0f;
-		float PSaimbotsmooth = 0.24;
-		int PSaimbotdistance = 300;
+		float PSaimbotfov;
+		float PSaimbotsmooth;
+		int PSaimbotdistance;
 		int PSaimbotcombobone;
 		int PSaimbotcombokey;
 		bool PSaimbotautoshot;
@@ -138,8 +138,8 @@ public:
 
 		//rcs
 		bool rcsenable;
-		float rcsscaleX = 2.f;
-		float rcsscaleY = 2.f;
+		float rcsscaleX;
+		float rcsscaleY;
 	};
 
 	struct modules_t

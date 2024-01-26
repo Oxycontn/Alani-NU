@@ -17,6 +17,7 @@ public:
 	static CLocal* GetLocalPawn();
 	static view_matrix_t GetViewMatrix();
 	static Vector2 AimPunchAngle(aimPunchCache AimPunch);
+	static int GetWeaponGroup(std::string weaponName);
 
 	int Health() const noexcept;
 	int Team() const noexcept;

@@ -94,9 +94,9 @@ Vector2 Vector2::AimbotAimCalculation(Vector bonePos, Vector localPos, Vector2 v
     deltaY = bonePos.y - localPos.y;
 
     if (fFlags == 65667)
-        deltaZ = (bonePos.z - 43.f) - localPos.z;
+        deltaZ = (bonePos.z - 40.f) - localPos.z;
     else
-        deltaZ = (bonePos.z - 63.f) - localPos.z;
+        deltaZ = (bonePos.z - 60.f) - localPos.z;
 
     distance = sqrt(pow(deltaX, 2) + pow(deltaY, 2));
     yaw = atan2f(deltaY, deltaX) * 180 / M_PI - viewAngle.y;
@@ -105,11 +105,6 @@ Vector2 Vector2::AimbotAimCalculation(Vector bonePos, Vector localPos, Vector2 v
     Vector2 aimPos{ pitch, yaw };
 
     return aimPos;
-}
-
-float DEG2RAD(float degree)
-{
-    return degree * (M_PI / 180);
 }
 
 float Vector2::AimbotFovCalculation(Vector2 aimPos, float distance, float aimbotFov)
@@ -129,10 +124,10 @@ Vector2 Vector2::AngleToScreenOffset(float angleX, float angleY, float previousX
     float fovRad = fov * (M_PI / 180.0f);
 
     double thetaX = (angleX - previousX) * (M_PI / 180.0f);
-    double offsetX = (width * tan(thetaX)) / (2 * tan(fovRad / 2));
+    double offsetX = (width * tan(thetaX)) / (1.7 * tan(fovRad / 2));
 
     double thetaY = (angleY - previousY) * (M_PI / 180.0f);
-    double offsetY = (height * tan(thetaY)) / (2 * tan(fovRad / 2));
+    double offsetY = (height * tan(thetaY)) / (1.7 * tan(fovRad / 2));
 
     return Vector2(-offsetX, offsetY);
 }

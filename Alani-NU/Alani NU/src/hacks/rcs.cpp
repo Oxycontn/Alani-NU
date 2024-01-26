@@ -10,12 +10,14 @@
 void CRCS::RcsLoop()
 {
 	std::string weaponName = global.localPlayer.weaponName;
+	int weaponGroup = CLocal::GetWeaponGroup(weaponName);
+
 	auto localPlayerPawn = CLocal::GetLocalPawn();
 	int shotsFired = localPlayerPawn->ShotsFired();
 
 	if (global.features.rcsenable && !aimbot.aimbotRCS)
 	{
-		if (weaponName == "weapon_ak47" || weaponName == "weapon_aug" || weaponName == "weapon_famas" || weaponName == "weapon_galilar" || weaponName == "weapon_m4a1_silencer" || weaponName == "weapon_m4a1" || weaponName == "weapon_sg553" || weaponName == "weapon_mac10" || weaponName == "weapon_mp7" || weaponName == "weapon_mp9" || weaponName == "weapon_mp5sd" || weaponName == "weapon_ump45" || weaponName == "weapon_bizon" || weaponName == "weapon_p90")
+		if (weaponGroup == 1 || weaponGroup == 5)
 		{
 			if (shotsFired != 0 && GetAsyncKeyState(VK_LBUTTON))
 			{

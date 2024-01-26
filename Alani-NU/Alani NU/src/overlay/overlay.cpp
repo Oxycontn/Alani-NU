@@ -1560,33 +1560,36 @@ void Menu::AimbotGraph()
     //define
     ImGui::PlotInterface plot1, plot2;
     std::vector<ImGui::PlotItem> items1(1), items2(1);
-    float aimbotX, aimbotY;
+    float aimbotX{}, aimbotY{};
 
     //define what page the user is on for aimbot!
-    if (global.features.aimbotGunCombo == 0)
+
+    switch (global.features.aimbotGunCombo)
     {
+    case 0:
         aimbotX = global.features.ARaimbotsmooth;
         aimbotY = global.features.ARaimbotdistance;
-    }
-    else if (global.features.aimbotGunCombo == 1)
-    {
+        break;
+
+    case 1:
         aimbotX = global.features.SGaimbotsmooth;
         aimbotY = global.features.SGaimbotdistance;
-    }
-    else if (global.features.aimbotGunCombo == 2)
-    {
+        break;
+
+    case 2:
         aimbotX = global.features.PSaimbotsmooth;
         aimbotY = global.features.PSaimbotdistance;
-    }
-    else if (global.features.aimbotGunCombo == 3)
-    {
+        break;
+
+    case 3:
         aimbotX = global.features.SRaimbotsmooth;
         aimbotY = global.features.SRaimbotdistance;
-    }
-    else if (global.features.aimbotGunCombo == 4)
-    {
+        break;
+
+    case 4:
         aimbotX = global.features.SMGaimbotsmooth;
         aimbotY = global.features.SMGaimbotdistance;
+        break;
     }
 
     //setup aimbot plot
@@ -1594,17 +1597,17 @@ void Menu::AimbotGraph()
     plot1.x_axis.label = "Smooth";
     plot1.y_axis.label = "Distance";
     plot1.y_axis.maximum = 2000;
-    plot1.x_axis.maximum = 1.001;
+    plot1.x_axis.maximum = .815f;
 
     //set up aimbot line
     items1[0].label = "Effect";
     items1[0].type = ImGui::PlotItem::Line;
     items1[0].color = ImVec4{1,1,1,1};
     items1[0].size = 2;
-    items1[0].data.resize(10000);
-    for (int i = 0; i < 10000; ++i)
+    items1[0].data.resize(1000);
+    for (int i = 0; i < 1000; ++i)
     {
-        float x = i * aimbotX;
+        float x = i * (aimbotX - 0.29);
         float y = std::sin(1.5 * x) * aimbotY;
         items1[0].data[i] = { x, y };
     }
@@ -1614,7 +1617,7 @@ void Menu::AimbotGraph()
     plot2.x_axis.label = "Horizontal";
     plot2.y_axis.label = "Vertical";
     plot2.y_axis.maximum = 2;
-    plot2.x_axis.maximum = 2;
+    plot2.x_axis.maximum = 2.1f;
 
     //set up rcs line
     items2[0].label = "Effect";

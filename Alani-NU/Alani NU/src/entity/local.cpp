@@ -91,3 +91,30 @@ Vector2 CLocal::EyePosition() const noexcept
 {
 	return driver.Read<Vector2>(localPlayerPawn + 0x1518);
 }
+
+int CLocal::GetWeaponGroup(std::string weaponName)
+{
+	int weaponGroup;
+
+	//ar
+	if (weaponName == "weapon_ak47" || weaponName == "weapon_aug" || weaponName == "weapon_famas" || weaponName == "weapon_galilar" || weaponName == "weapon_m4a1_silencer" || weaponName == "weapon_m4a1" || weaponName == "weapon_sg553")
+		weaponGroup = 1;
+
+	//shotgun
+	if (weaponName == "weapon_mag7" || weaponName == "weapon_sawedoff" || weaponName == "weapon_nova" || weaponName == "weapon_xm1014")
+		weaponGroup = 2;
+
+	//pistols
+	if (weaponName == "weapon_cz75a" || weaponName == "weapon_deagle" || weaponName == "weapon_elite" || weaponName == "weapon_fiveseven" || weaponName == "weapon_glock" || weaponName == "weapon_hkp2000" || weaponName == "weapon_p250" || weaponName == "weapon_revolver" || weaponName == "weapon_tec9" || weaponName == "weapon_usp_silencer")
+		weaponGroup = 3;
+
+	//snipers
+	if (weaponName == "weapon_awp" || weaponName == "weapon_g3sg1" || weaponName == "weapon_scar20" || weaponName == "weapon_ssg08")
+		weaponGroup = 4;
+
+	//smgs
+	if (weaponName == "weapon_mac10" || weaponName == "weapon_mp7" || weaponName == "weapon_mp9" || weaponName == "weapon_mp5sd" || weaponName == "weapon_ump45" || weaponName == "weapon_bizon" || weaponName == "weapon_p90")
+		weaponGroup = 5;
+
+	return weaponGroup;
+}

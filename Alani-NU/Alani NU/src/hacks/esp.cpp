@@ -151,6 +151,7 @@ void CEntityLoop::EspLoop()
             auto designerNameptr = CWEntity::DesignerNamePtr(pEntity);
 
             std::string designerName = CWEntity::ReadDesignerName(designerNameptr);
+
             if (designerName.find("weapon"))
                 continue;
 
@@ -158,7 +159,6 @@ void CEntityLoop::EspLoop()
 
             Vector entityOrigin = CWEntity::EntityPosition(gameScene);
 
-            //cache info
             global.world.designerName = designerName;
             global.world.entityOrigin = entityOrigin;
 
@@ -582,48 +582,49 @@ void CEntityLoop::RenderEsp()
 void CEntityLoop::RenderFov()
 {
     std::string weaponName = global.localPlayer.weaponName;
+    int weaponGroup = CLocal::GetWeaponGroup(weaponName);
 
     //AR
-    if (weaponName == "weapon_ak47" || weaponName == "weapon_aug" || weaponName == "weapon_famas" || weaponName == "weapon_galilar" || weaponName == "weapon_m4a1_silencer" || weaponName == "weapon_m4a1" || weaponName == "weapon_sg553")
+    if (weaponGroup == 1)
         if (global.features.ARaimbotfovcircle)
         {
-            Render::Circle(screenWidth / 2, screenHeight / 2, global.features.ARaimbotfov, white, 255, false);
+            Render::Circle(screenWidth / 2, screenHeight / 2, global.features.ARaimbotfov * 1.7, white, 255, false);
             if (aimbot.showBoneAngle)
                 Render::Line(screenWidth / 2, screenHeight / 2, aimbot.boneAngle.x, aimbot.boneAngle.y, green, 255, 1.5);
         }
 
     //SG
-    if (weaponName == "weapon_mag7" || weaponName == "weapon_sawedoff" || weaponName == "weapon_nova" || weaponName == "weapon_xm1014")
+    if (weaponGroup == 2)
         if (global.features.SGaimbotfovcircle)
         {
-            Render::Circle(screenWidth / 2, screenHeight / 2, global.features.SGaimbotfov, white, 255, false);
+            Render::Circle(screenWidth / 2, screenHeight / 2, global.features.SGaimbotfov * 1.7, white, 255, false);
             if (aimbot.showBoneAngle)
                 Render::Line(screenWidth / 2, screenHeight / 2, aimbot.boneAngle.x, aimbot.boneAngle.y, green, 255, 1.5);
         }
 
     //Pistols
-    if (weaponName == "weapon_cz75a" || weaponName == "weapon_deagle" || weaponName == "weapon_elite" || weaponName == "weapon_fiveseven" || weaponName == "weapon_glock" || weaponName == "weapon_hkp2000" || weaponName == "weapon_p250" || weaponName == "weapon_revolver" || weaponName == "weapon_tec9" || weaponName == "weapon_usp_silencer")
+    if (weaponGroup == 3)
         if (global.features.PSaimbotfovcircle)
         {
-            Render::Circle(screenWidth / 2, screenHeight / 2, global.features.PSaimbotfov, white, 255, false);
+            Render::Circle(screenWidth / 2, screenHeight / 2, global.features.PSaimbotfov * 1.7, white, 255, false);
             if (aimbot.showBoneAngle)
                 Render::Line(screenWidth / 2, screenHeight / 2, aimbot.boneAngle.x, aimbot.boneAngle.y, green, 255, 1.5);
         }
 
     //SR
-    if (weaponName == "weapon_awp" || weaponName == "weapon_g3sg1" || weaponName == "weapon_scar20" || weaponName == "weapon_ssg08")
+    if (weaponGroup == 4)
         if (global.features.SRaimbotfovcircle)
         {
-            Render::Circle(screenWidth / 2, screenHeight / 2, global.features.SRaimbotfov, white, 255, false);
+            Render::Circle(screenWidth / 2, screenHeight / 2, global.features.SRaimbotfov * 1.7, white, 255, false);
             if (aimbot.showBoneAngle)
                 Render::Line(screenWidth / 2, screenHeight / 2, aimbot.boneAngle.x, aimbot.boneAngle.y, green, 255, 1.5);
         }
 
     //SMG
-    if (weaponName == "weapon_mac10" || weaponName == "weapon_mp7" || weaponName == "weapon_mp9" || weaponName == "weapon_mp5sd" || weaponName == "weapon_ump45" || weaponName == "weapon_bizon" || weaponName == "weapon_p90")
+    if (weaponGroup == 5)
         if (global.features.SMGaimbotfovcircle)
         {
-            Render::Circle(screenWidth / 2, screenHeight / 2, global.features.SMGaimbotfov, white, 255, false);
+            Render::Circle(screenWidth / 2, screenHeight / 2, global.features.SMGaimbotfov * 1.7, white, 255, false);
             if (aimbot.showBoneAngle)
                 Render::Line(screenWidth / 2, screenHeight / 2, aimbot.boneAngle.x, aimbot.boneAngle.y, green, 255, 1.5);
         }

@@ -13,7 +13,7 @@ void CAimbot::AimbotThread()
 {
     while (true)
     {
-		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 		if (global.threads.stopAimbot)
 			std::terminate();
@@ -27,71 +27,73 @@ void CAimbot::AimbotThread()
 void CAimbot::AimbotLoop()
 {
 	uintptr_t entityList = CEntity::GetEntityList();
+	
+	std::string weaponName = global.localPlayer.weaponName;
+	int weaponGroup = CLocal::GetWeaponGroup(weaponName);
 
-	for (int i = 1; i < 64; ++i)
+	bool aimbotEnable = AimbotEnable(weaponGroup);
+
+	if (aimbotEnable)
 	{
-		if (overlay.RenderMenu)
-			continue;
-
-		//entity varibles
-		auto playerController = CEntity::GetPlayerController(entityList, global.localPlayer.localPlayerController, i);
-
-		auto pCSPlayerPawn = CEntity::GetpCSPlayerPawn(entityList, playerController, i);
-
-		int health = pCSPlayerPawn->Health();
-
-		if (health <= 0 || health > 100)
-			continue;
-
-		int playerTeam = pCSPlayerPawn->Team();
-
-		if (playerTeam == global.localPlayer.team)
-			continue;
-		
-		bool spottedState = pCSPlayerPawn->spottedState();
-		uintptr_t bonearray = pCSPlayerPawn->Bonearray();
-		Vector playerPos = pCSPlayerPawn->Feet(bonearray);
-
-		//local player varibles
-		view_matrix_t viewMatrix = global.localPlayer.vm;
-		std::string weaponName = global.localPlayer.weaponName;
-
-		auto localPlayerPawn = CLocal::GetLocalPawn();
-		Vector localPos = localPlayerPawn->Position();
-
-		Vector2 viewAngle = localPlayerPawn->ViewAngle();
-		bool ammo = localPlayerPawn->Ammo();
-
-		int shotsFired = localPlayerPawn->ShotsFired();
-		auto fFlags = localPlayerPawn->Flags();
-
-		Vector2 eyePos = localPlayerPawn->EyePosition();
-		Vector bonePos = AimbotBone(weaponName, bonearray);
-
-		//calculations
-		Vector2 aimPos = Vector2::AimbotAimCalculation(bonePos, localPos, viewAngle, fFlags);
-		float pitch = aimPos.x;
-		float yaw = aimPos.y;
-
-		float distance = localPos.CalculateDistance(playerPos);
-
-		//settings
-		bool aimbotEnable = AimbotEnable(weaponName);
-		float aimbotFov = AimbotFov(weaponName);
-
-		bool aimbotVisable = AimbotVisable(weaponName);
-		int vKey = AimbotKey(weaponName);
-
-		bool aimbotAuto = AimbotAutoshoot(weaponName);
-		float aimbotSmooth = AimbotSmooth(weaponName);
-
-		float aimbotDistance = AimbotDistance(weaponName);
-		int aimbotSleep = AimbotAutoSleep(weaponName);
-
-		float fov = Vector2::AimbotFovCalculation(aimPos, distance, aimbotFov);
-
-		if (aimbotEnable)
+		for (int i = 1; i < 64; ++i)
 		{
+			if (overlay.RenderMenu)
+				continue;
+
+			//entity varibles
+			auto playerController = CEntity::GetPlayerController(entityList, global.localPlayer.localPlayerController, i);
+
+			auto pCSPlayerPawn = CEntity::GetpCSPlayerPawn(entityList, playerController, i);
+
+			int health = pCSPlayerPawn->Health();
+
+			if (health <= 0 || health > 100)
+				continue;
+
+			int playerTeam = pCSPlayerPawn->Team();
+
+			if (playerTeam == global.localPlayer.team)
+				continue;
+
+			bool spottedState = pCSPlayerPawn->spottedState();
+			uintptr_t bonearray = pCSPlayerPawn->Bonearray();
+			Vector playerPos = pCSPlayerPawn->Feet(bonearray);
+
+			//local player varibles
+			view_matrix_t viewMatrix = CLocal::GetViewMatrix();
+
+			auto localPlayerPawn = CLocal::GetLocalPawn();
+			Vector localPos = localPlayerPawn->Position();
+
+			Vector2 viewAngle = localPlayerPawn->ViewAngle();
+			bool ammo = localPlayerPawn->Ammo();
+
+			int shotsFired = localPlayerPawn->ShotsFired();
+			auto fFlags = localPlayerPawn->Flags();
+
+			Vector2 eyePos = localPlayerPawn->EyePosition();
+			Vector bonePos = AimbotBone(weaponGroup, bonearray);
+
+			//settings
+			float aimbotFov = AimbotFov(weaponGroup);
+
+			bool aimbotVisable = AimbotVisable(weaponGroup);
+			int vKey = AimbotKey(weaponGroup);
+
+			bool aimbotAuto = AimbotAutoshoot(weaponGroup);
+			float aimbotSmooth = AimbotSmooth(weaponGroup);
+
+			float aimbotDistance = AimbotDistance(weaponGroup);
+			int aimbotSleep = AimbotAutoSleep(weaponGroup);
+
+			//calculations
+			Vector2 aimPos = Vector2::AimbotAimCalculation(bonePos, localPos, viewAngle, fFlags);
+			float pitch = aimPos.x;
+			float yaw = aimPos.y;
+
+			float distance = localPos.CalculateDistance(playerPos);
+			float fov = Vector2::AimbotFovCalculation(aimPos, distance, aimbotFov);
+
 			if (aimbotFov >= fov && aimbotDistance >= distance && ammo != 0)
 			{
 				showBoneAngle = true;
@@ -106,7 +108,7 @@ void CAimbot::AimbotLoop()
 
 					if (global.features.rcsenable)
 					{
-						if (weaponName == "weapon_ak47" || weaponName == "weapon_aug" || weaponName == "weapon_famas" || weaponName == "weapon_galilar" || weaponName == "weapon_m4a1_silencer" || weaponName == "weapon_m4a1" || weaponName == "weapon_sg553" || weaponName == "weapon_mac10" || weaponName == "weapon_mp7" || weaponName == "weapon_mp9" || weaponName == "weapon_mp5sd" || weaponName == "weapon_ump45" || weaponName == "weapon_bizon" || weaponName == "weapon_p90")
+						if (weaponGroup == 1 || weaponGroup == 5)
 						{
 							if (shotsFired != 0)
 							{
@@ -117,7 +119,7 @@ void CAimbot::AimbotLoop()
 								if (!aimPunch.x && !aimPunch.y)
 									return;
 
-								pitch -= aimPunch.x * global.features.rcsscaleX; 
+								pitch -= aimPunch.x * global.features.rcsscaleX;
 								yaw -= aimPunch.y * global.features.rcsscaleY;
 
 								rcs.oldAngle.x = aimPunch.x * global.features.rcsscaleX;
@@ -174,356 +176,472 @@ void CAimbot::AimbotLoop()
 	}
 }
 
-int CAimbot::AimbotKey(std::string weaponName)
+/*
+weaponGroup identifier : 
+1 = AR
+2 = Shotguns
+3 = Pistols
+4 = Snipers
+5 = Smgs
+*/
+
+int CAimbot::AimbotKey(int weaponGroup)
 {
 	int vKey{};
 
-	//AR
-	if (weaponName == "weapon_ak47" || weaponName == "weapon_aug" || weaponName == "weapon_famas" || weaponName == "weapon_galilar" || weaponName == "weapon_m4a1_silencer" || weaponName == "weapon_m4a1" || weaponName == "weapon_sg553")
+	switch (weaponGroup)
 	{
-		if (global.features.ARaimbotcombokey == 0)
+	case 1:
+		switch (global.features.ARaimbotcombokey)
+		{
+		case 0:
 			vKey = VK_XBUTTON2;
-		else if (global.features.ARaimbotcombokey == 1)
-			vKey = VK_LSHIFT;
-		else if (global.features.ARaimbotcombokey == 2)
-			vKey = VK_LCONTROL;
-		else if (global.features.ARaimbotcombokey == 3)
-			vKey = VK_LBUTTON;
-	}
+			break;
 
-	//SG
-	if (weaponName == "weapon_mag7" || weaponName == "weapon_sawedoff" || weaponName == "weapon_nova" || weaponName == "weapon_xm1014")
-	{
-		if (global.features.SGaimbotcombokey == 0)
-			vKey = VK_XBUTTON2;
-		else if (global.features.SGaimbotcombokey == 1)
+		case 1:
 			vKey = VK_LSHIFT;
-		else if (global.features.SGaimbotcombokey == 2)
-			vKey = VK_LCONTROL;
-		else if (global.features.SGaimbotcombokey == 3)
-			vKey = VK_LBUTTON;
-	}
+			break;
 
-	//Pistols
-	if (weaponName == "weapon_cz75a" || weaponName == "weapon_deagle" || weaponName == "weapon_elite" || weaponName == "weapon_fiveseven" || weaponName == "weapon_glock" || weaponName == "weapon_hkp2000" || weaponName == "weapon_p250" || weaponName == "weapon_revolver" || weaponName == "weapon_tec9" || weaponName == "weapon_usp_silencer")
-	{
-		if (global.features.PSaimbotcombokey == 0)
-			vKey = VK_XBUTTON2;
-		else if (global.features.PSaimbotcombokey == 1)
-			vKey = VK_LSHIFT;
-		else if (global.features.PSaimbotcombokey == 2)
+		case 2:
 			vKey = VK_LCONTROL;
-		else if (global.features.PSaimbotcombokey == 3)
-			vKey = VK_LBUTTON;
-	}
+			break;
 
-	//SR
-	if (weaponName == "weapon_awp" || weaponName == "weapon_g3sg1" || weaponName == "weapon_scar20" || weaponName == "weapon_ssg08")
-	{
-		if (global.features.SRaimbotcombokey == 0)
-			vKey = VK_XBUTTON2;
-		else if (global.features.SRaimbotcombokey == 1)
-			vKey = VK_LSHIFT;
-		else if (global.features.SRaimbotcombokey == 2)
-			vKey = VK_LCONTROL;
-		else if (global.features.SRaimbotcombokey == 3)
+		case 3:
 			vKey = VK_LBUTTON;
-	}
+			break;
+		}
+		break;
 
-	//SMG
-	if (weaponName == "weapon_mac10" || weaponName == "weapon_mp7" || weaponName == "weapon_mp9" || weaponName == "weapon_mp5sd" || weaponName == "weapon_ump45" || weaponName == "weapon_bizon" || weaponName == "weapon_p90")
-	{
-		if (global.features.SMGaimbotcombokey == 0)
+	case 2:
+		switch (global.features.SGaimbotcombokey)
+		{
+		case 0:
 			vKey = VK_XBUTTON2;
-		else if (global.features.SMGaimbotcombokey == 1)
+			break;
+
+		case 1:
 			vKey = VK_LSHIFT;
-		else if (global.features.SMGaimbotcombokey == 2)
+			break;
+
+		case 2:
 			vKey = VK_LCONTROL;
-		else if (global.features.SMGaimbotcombokey == 3)
+			break;
+
+		case 3:
 			vKey = VK_LBUTTON;
+			break;
+		}
+		break;
+
+	case 3:
+		switch (global.features.PSaimbotcombokey)
+		{
+		case 0:
+			vKey = VK_XBUTTON2;
+			break;
+
+		case 1:
+			vKey = VK_LSHIFT;
+			break;
+
+		case 2:
+			vKey = VK_LCONTROL;
+			break;
+
+		case 3:
+			vKey = VK_LBUTTON;
+			break;
+		}
+		break;
+
+	case 4:
+		switch (global.features.SRaimbotcombokey)
+		{
+		case 0:
+			vKey = VK_XBUTTON2;
+			break;
+
+		case 1:
+			vKey = VK_LSHIFT;
+			break;
+
+		case 2:
+			vKey = VK_LCONTROL;
+			break;
+
+		case 3:
+			vKey = VK_LBUTTON;
+			break;
+		}
+		break;
+
+	case 5:
+		switch (global.features.SMGaimbotcombokey)
+		{
+		case 0:
+			vKey = VK_XBUTTON2;
+			break;
+
+		case 1:
+			vKey = VK_LSHIFT;
+			break;
+
+		case 2:
+			vKey = VK_LCONTROL;
+			break;
+
+		case 3:
+			vKey = VK_LBUTTON;
+			break;
+		}
+		break;
 	}
 
 	return vKey;
 }
 
-Vector CAimbot::AimbotBone(std::string weaponName, uintptr_t bonearray)
+Vector CAimbot::AimbotBone(int weaponGroup, uintptr_t bonearray)
 {
-	Vector bone;
+	Vector bone{};
 
 	Vector boneHead = driver.Read<Vector>(bonearray + bones::head * 32);
 	Vector boneNeck = driver.Read<Vector>(bonearray + bones::neck * 32);
 	Vector boneSpine = driver.Read<Vector>(bonearray + bones::spine * 32);
 	Vector boneCock = driver.Read<Vector>(bonearray + bones::cock * 32);
 
-	//AR
-	if (weaponName == "weapon_ak47" || weaponName == "weapon_aug" || weaponName == "weapon_famas" || weaponName == "weapon_galilar" || weaponName == "weapon_m4a1_silencer" || weaponName == "weapon_m4a1" || weaponName == "weapon_sg553")
+	switch (weaponGroup)
 	{
-		if (global.features.ARaimbotcombobone == 0)
+	case 1:
+		switch (global.features.ARaimbotcombobone)
+		{
+		case 0:
 			bone = boneHead;
-		else if (global.features.ARaimbotcombobone == 1)
-			bone = boneNeck;
-		else if (global.features.ARaimbotcombobone == 2)
-			bone = boneSpine;
-		else if (global.features.ARaimbotcombobone == 3)
-			bone = boneCock;
-	}
+			break;
 
-	//SG
-	if (weaponName == "weapon_mag7" || weaponName == "weapon_sawedoff" || weaponName == "weapon_nova" || weaponName == "weapon_xm1014")
-	{
-		if (global.features.SGaimbotcombobone == 0)
-			bone = boneHead;
-		else if (global.features.SGaimbotcombobone == 1)
+		case 1:
 			bone = boneNeck;
-		else if (global.features.SGaimbotcombobone == 2)
-			bone = boneSpine;
-		else if (global.features.SGaimbotcombobone == 3)
-			bone = boneCock;
-	}
+			break;
 
-	//Pistols
-	if (weaponName == "weapon_cz75a" || weaponName == "weapon_deagle" || weaponName == "weapon_elite" || weaponName == "weapon_fiveseven" || weaponName == "weapon_glock" || weaponName == "weapon_hkp2000" || weaponName == "weapon_p250" || weaponName == "weapon_revolver" || weaponName == "weapon_tec9" || weaponName == "weapon_usp_silencer")
-	{
-		if (global.features.PSaimbotcombobone == 0)
-			bone = boneHead;
-		else if (global.features.PSaimbotcombobone == 1)
-			bone = boneNeck;
-		else if (global.features.PSaimbotcombobone == 2)
+		case 2:
 			bone = boneSpine;
-		else if (global.features.PSaimbotcombobone == 3)
-			bone = boneCock;
-	}
+			break;
 
-	//SR
-	if (weaponName == "weapon_awp" || weaponName == "weapon_g3sg1" || weaponName == "weapon_scar20" || weaponName == "weapon_ssg08")
-	{
-		if (global.features.SRaimbotcombobone == 0)
-			bone = boneHead;
-		else if (global.features.SRaimbotcombobone == 1)
-			bone = boneNeck;
-		else if (global.features.SRaimbotcombobone == 2)
-			bone = boneSpine;
-		else if (global.features.SRaimbotcombobone == 3)
+		case 3:
 			bone = boneCock;
-	}
+			break;
+		}
+		break;
 
-	//SMG
-	if (weaponName == "weapon_mac10" || weaponName == "weapon_mp7" || weaponName == "weapon_mp9" || weaponName == "weapon_mp5sd" || weaponName == "weapon_ump45" || weaponName == "weapon_bizon" || weaponName == "weapon_p90")
-	{
-		if (global.features.SMGaimbotcombobone == 0)
+	case 2:
+		switch (global.features.SGaimbotcombobone)
+		{
+		case 0:
 			bone = boneHead;
-		else if (global.features.SMGaimbotcombobone == 1)
+			break;
+
+		case 1:
 			bone = boneNeck;
-		else if (global.features.SMGaimbotcombobone == 2)
+			break;
+
+		case 2:
 			bone = boneSpine;
-		else if (global.features.SMGaimbotcombobone == 3)
+			break;
+
+		case 3:
 			bone = boneCock;
+			break;
+		}
+		break;
+
+	case 3:
+		switch (global.features.PSaimbotcombobone)
+		{
+		case 0:
+			bone = boneHead;
+			break;
+
+		case 1:
+			bone = boneNeck;
+			break;
+
+		case 2:
+			bone = boneSpine;
+			break;
+
+		case 3:
+			bone = boneCock;
+			break;
+		}
+		break;
+
+	case 4:
+		switch (global.features.SRaimbotcombobone)
+		{
+		case 0:
+			bone = boneHead;
+			break;
+
+		case 1:
+			bone = boneNeck;
+			break;
+
+		case 2:
+			bone = boneSpine;
+			break;
+
+		case 3:
+			bone = boneCock;
+			break;
+		}
+		break;
+
+	case 5:
+		switch (global.features.SMGaimbotcombobone)
+		{
+		case 0:
+			bone = boneHead;
+			break;
+
+		case 1:
+			bone = boneNeck;
+			break;
+
+		case 2:
+			bone = boneSpine;
+			break;
+
+		case 3:
+			bone = boneCock;
+			break;
+		}
+		break;
 	}
 
 	//return bone
 	return bone;
 }
 
-bool CAimbot::AimbotEnable(std::string weaponName)
+bool CAimbot::AimbotEnable(int weaponGroup)
 {
 	bool enable = false;
 
-	//AR
-	if (weaponName == "weapon_ak47" || weaponName == "weapon_aug" || weaponName == "weapon_famas" || weaponName == "weapon_galilar" || weaponName == "weapon_m4a1_silencer" || weaponName == "weapon_m4a1" || weaponName == "weapon_sg553")
+	switch (weaponGroup)
+	{
+	case 1:
 		if (global.features.ARaimbotenable)
 			enable = true;
+		break;
 
-	//SG
-	if (weaponName == "weapon_mag7" || weaponName == "weapon_sawedoff" || weaponName == "weapon_nova" || weaponName == "weapon_xm1014")
+	case 2:
 		if (global.features.SGaimbotenable)
 			enable = true;
+		break;
 
-	//Pistols
-	if (weaponName == "weapon_cz75a" || weaponName == "weapon_deagle" || weaponName == "weapon_elite" || weaponName == "weapon_fiveseven" || weaponName == "weapon_glock" || weaponName == "weapon_hkp2000" || weaponName == "weapon_p250" || weaponName == "weapon_revolver" || weaponName == "weapon_tec9" || weaponName == "weapon_usp_silencer")
+	case 3:
 		if (global.features.PSaimbotenable)
 			enable = true;
+		break;
 
-	//SR
-	if (weaponName == "weapon_awp" || weaponName == "weapon_g3sg1" || weaponName == "weapon_scar20" || weaponName == "weapon_ssg08")
+	case 4:
 		if (global.features.SRaimbotenable)
 			enable = true;
+		break;
 
-	//SMG
-	if (weaponName == "weapon_mac10" || weaponName == "weapon_mp7" || weaponName == "weapon_mp9" || weaponName == "weapon_mp5sd" || weaponName == "weapon_ump45" || weaponName == "weapon_bizon" || weaponName == "weapon_p90")
+	case 5:
 		if (global.features.SMGaimbotenable)
 			enable = true;
+		break;
+	}
 
 	return enable;
 }
 
-float CAimbot::AimbotFov(std::string weaponName)
+float CAimbot::AimbotFov(int weaponGroup)
 {
-	float fov = 0;
+	float fov{};
 
-	//AR
-	if (weaponName == "weapon_ak47" || weaponName == "weapon_aug" || weaponName == "weapon_famas" || weaponName == "weapon_galilar" || weaponName == "weapon_m4a1_silencer" || weaponName == "weapon_m4a1" || weaponName == "weapon_sg553")
+	switch (weaponGroup)
+	{
+	case 1:
 		fov = global.features.ARaimbotfov;
+		break;
 
-	//SG
-	if (weaponName == "weapon_mag7" || weaponName == "weapon_sawedoff" || weaponName == "weapon_nova" || weaponName == "weapon_xm1014")
+	case 2:
 		fov = global.features.SGaimbotfov;
+		break;
 
-	//Pistols
-	if (weaponName == "weapon_cz75a" || weaponName == "weapon_deagle" || weaponName == "weapon_elite" || weaponName == "weapon_fiveseven" || weaponName == "weapon_glock" || weaponName == "weapon_hkp2000" || weaponName == "weapon_p250" || weaponName == "weapon_revolver" || weaponName == "weapon_tec9" || weaponName == "weapon_usp_silencer")
+	case 3:
 		fov = global.features.PSaimbotfov;
+		break;
 
-	//SR
-	if (weaponName == "weapon_awp" || weaponName == "weapon_g3sg1" || weaponName == "weapon_scar20" || weaponName == "weapon_ssg08")
+	case 4:
 		fov = global.features.SRaimbotfov;
+		break;
 
-	//SMG
-	if (weaponName == "weapon_mac10" || weaponName == "weapon_mp7" || weaponName == "weapon_mp9" || weaponName == "weapon_mp5sd" || weaponName == "weapon_ump45" || weaponName == "weapon_bizon" || weaponName == "weapon_p90")
+	case 5:
 		fov = global.features.SMGaimbotfov;
+		break;
+	}
 
 	return fov;
 }
 
-bool CAimbot::AimbotVisable(std::string weaponName)
+bool CAimbot::AimbotVisable(int weaponGroup)
 {
 	bool visable = false;
 
-	//AR
-	if (weaponName == "weapon_ak47" || weaponName == "weapon_aug" || weaponName == "weapon_famas" || weaponName == "weapon_galilar" || weaponName == "weapon_m4a1_silencer" || weaponName == "weapon_m4a1" || weaponName == "weapon_sg553")
+	switch (weaponGroup)
+	{
+	case 1:
 		if (global.features.ARaimbotvisable)
 			visable = true;
+		break;
 
-	//SG
-	if (weaponName == "weapon_mag7" || weaponName == "weapon_sawedoff" || weaponName == "weapon_nova" || weaponName == "weapon_xm1014")
+	case 2:
 		if (global.features.SGaimbotvisable)
 			visable = true;
+		break;
 
-	//Pistols
-	if (weaponName == "weapon_cz75a" || weaponName == "weapon_deagle" || weaponName == "weapon_elite" || weaponName == "weapon_fiveseven" || weaponName == "weapon_glock" || weaponName == "weapon_hkp2000" || weaponName == "weapon_p250" || weaponName == "weapon_revolver" || weaponName == "weapon_tec9" || weaponName == "weapon_usp_silencer")
+	case 3:
 		if (global.features.PSaimbotvisable)
 			visable = true;
+		break;
 
-	//SR
-	if (weaponName == "weapon_awp" || weaponName == "weapon_g3sg1" || weaponName == "weapon_scar20" || weaponName == "weapon_ssg08")
+	case 4:
 		if (global.features.SRaimbotvisable)
 			visable = true;
+		break;
 
-	//SMG
-	if (weaponName == "weapon_mac10" || weaponName == "weapon_mp7" || weaponName == "weapon_mp9" || weaponName == "weapon_mp5sd" || weaponName == "weapon_ump45" || weaponName == "weapon_bizon" || weaponName == "weapon_p90")
+	case 5:
 		if (global.features.SMGaimbotvisable)
 			visable = true;
+		break;
+	}
 
 	return visable;
 }
 
-bool CAimbot::AimbotAutoshoot(std::string weaponName)
+bool CAimbot::AimbotAutoshoot(int weaponGroup)
 {
 	bool autoShoot = false;
 
-	//AR
-	if (weaponName == "weapon_ak47" || weaponName == "weapon_aug" || weaponName == "weapon_famas" || weaponName == "weapon_galilar" || weaponName == "weapon_m4a1_silencer" || weaponName == "weapon_m4a1" || weaponName == "weapon_sg553")
+	switch (weaponGroup)
+	{
+	case 1:
 		if (global.features.ARaimbotautoshot)
 			autoShoot = true;
+		break;
 
-	//SG
-	if (weaponName == "weapon_mag7" || weaponName == "weapon_sawedoff" || weaponName == "weapon_nova" || weaponName == "weapon_xm1014")
+	case 2:
 		if (global.features.SGaimbotautoshot)
 			autoShoot = true;
+		break;
 
-	//Pistols
-	if (weaponName == "weapon_cz75a" || weaponName == "weapon_deagle" || weaponName == "weapon_elite" || weaponName == "weapon_fiveseven" || weaponName == "weapon_glock" || weaponName == "weapon_hkp2000" || weaponName == "weapon_p250" || weaponName == "weapon_revolver" || weaponName == "weapon_tec9" || weaponName == "weapon_usp_silencer")
+	case 3:
 		if (global.features.PSaimbotautoshot)
 			autoShoot = true;
+		break;
 
-	//SR
-	if (weaponName == "weapon_awp" || weaponName == "weapon_g3sg1" || weaponName == "weapon_scar20" || weaponName == "weapon_ssg08")
+	case 4:
 		if (global.features.SRaimbotautoshot)
 			autoShoot = true;
+		break;
 
-	//SMG
-	if (weaponName == "weapon_mac10" || weaponName == "weapon_mp7" || weaponName == "weapon_mp9" || weaponName == "weapon_mp5sd" || weaponName == "weapon_ump45" || weaponName == "weapon_bizon" || weaponName == "weapon_p90")
+	case 5:
 		if (global.features.SMGaimbotautoshot)
 			autoShoot = true;
+		break;
+	}
 
 	return autoShoot;
 }
 
-float CAimbot::AimbotSmooth(std::string weaponName)
+float CAimbot::AimbotSmooth(int weaponGroup)
 {
-	float smooth = 0;
+	float smooth{};
 
-	//AR
-	if (weaponName == "weapon_ak47" || weaponName == "weapon_aug" || weaponName == "weapon_famas" || weaponName == "weapon_galilar" || weaponName == "weapon_m4a1_silencer" || weaponName == "weapon_m4a1" || weaponName == "weapon_sg553")
+	switch (weaponGroup)
+	{
+	case 1:
 		smooth = global.features.ARaimbotsmooth;
+		break;
 
-	//SG
-	if (weaponName == "weapon_mag7" || weaponName == "weapon_sawedoff" || weaponName == "weapon_nova" || weaponName == "weapon_xm1014")
+	case 2:
 		smooth = global.features.SGaimbotsmooth;
+		break;
 
-	//Pistols
-	if (weaponName == "weapon_cz75a" || weaponName == "weapon_deagle" || weaponName == "weapon_elite" || weaponName == "weapon_fiveseven" || weaponName == "weapon_glock" || weaponName == "weapon_hkp2000" || weaponName == "weapon_p250" || weaponName == "weapon_revolver" || weaponName == "weapon_tec9" || weaponName == "weapon_usp_silencer")
+	case 3:
 		smooth = global.features.PSaimbotsmooth;
+		break;
 
-	//SR
-	if (weaponName == "weapon_awp" || weaponName == "weapon_g3sg1" || weaponName == "weapon_scar20" || weaponName == "weapon_ssg08")
+	case 4:
 		smooth = global.features.SRaimbotsmooth;
+		break;
 
-	//SMG
-	if (weaponName == "weapon_mac10" || weaponName == "weapon_mp7" || weaponName == "weapon_mp9" || weaponName == "weapon_mp5sd" || weaponName == "weapon_ump45" || weaponName == "weapon_bizon" || weaponName == "weapon_p90")
+	case 5:
 		smooth = global.features.SMGaimbotsmooth;
+		break;
+	}
 
 	return smooth;
 }
 
-int CAimbot::AimbotDistance(std::string weaponName)
+int CAimbot::AimbotDistance(int weaponGroup)
 {
-	int distance = 0;
+	int distance{};
 
-	//AR
-	if (weaponName == "weapon_ak47" || weaponName == "weapon_aug" || weaponName == "weapon_famas" || weaponName == "weapon_galilar" || weaponName == "weapon_m4a1_silencer" || weaponName == "weapon_m4a1" || weaponName == "weapon_sg553")
+	switch (weaponGroup)
+	{
+	case 1:
 		distance = global.features.ARaimbotdistance;
+		break;
 
-	//SG
-	if (weaponName == "weapon_mag7" || weaponName == "weapon_sawedoff" || weaponName == "weapon_nova" || weaponName == "weapon_xm1014")
+	case 2:
 		distance = global.features.SGaimbotdistance;
+		break;
 
-	//Pistols
-	if (weaponName == "weapon_cz75a" || weaponName == "weapon_deagle" || weaponName == "weapon_elite" || weaponName == "weapon_fiveseven" || weaponName == "weapon_glock" || weaponName == "weapon_hkp2000" || weaponName == "weapon_p250" || weaponName == "weapon_revolver" || weaponName == "weapon_tec9" || weaponName == "weapon_usp_silencer")
+	case 3:
 		distance = global.features.PSaimbotdistance;
+		break;
 
-	//SR
-	if (weaponName == "weapon_awp" || weaponName == "weapon_g3sg1" || weaponName == "weapon_scar20" || weaponName == "weapon_ssg08")
+	case 41:
 		distance = global.features.SRaimbotdistance;
+		break;
 
-	//SMG
-	if (weaponName == "weapon_mac10" || weaponName == "weapon_mp7" || weaponName == "weapon_mp9" || weaponName == "weapon_mp5sd" || weaponName == "weapon_ump45" || weaponName == "weapon_bizon" || weaponName == "weapon_p90")
+	case 5:
 		distance = global.features.SMGaimbotdistance;
+		break;
+	}
 
 	return distance;
 }
 
-int CAimbot::AimbotAutoSleep(std::string weaponName)
+int CAimbot::AimbotAutoSleep(int weaponGroup)
 {
-	int sleep = 0;
+	int sleep{};
 
-	//AR
-	if (weaponName == "weapon_ak47" || weaponName == "weapon_aug" || weaponName == "weapon_famas" || weaponName == "weapon_galilar" || weaponName == "weapon_m4a1_silencer" || weaponName == "weapon_m4a1" || weaponName == "weapon_sg553")
+	switch (weaponGroup)
+	{
+	case 1:
 		sleep = global.features.ARautosleep;
+		break;
 
-	//SG
-	if (weaponName == "weapon_mag7" || weaponName == "weapon_sawedoff" || weaponName == "weapon_nova" || weaponName == "weapon_xm1014")
+	case 2:
 		sleep = global.features.SGautosleep;
+		break;
 
-	//Pistols
-	if (weaponName == "weapon_cz75a" || weaponName == "weapon_deagle" || weaponName == "weapon_elite" || weaponName == "weapon_fiveseven" || weaponName == "weapon_glock" || weaponName == "weapon_hkp2000" || weaponName == "weapon_p250" || weaponName == "weapon_revolver" || weaponName == "weapon_tec9" || weaponName == "weapon_usp_silencer")
+	case 3:
 		sleep = global.features.PSautosleep;
+		break;
 
-	//SR
-	if (weaponName == "weapon_awp" || weaponName == "weapon_g3sg1" || weaponName == "weapon_scar20" || weaponName == "weapon_ssg08")
+	case 4:
 		sleep = global.features.SRautosleep;
+		break;
 
-	//SMG
-	if (weaponName == "weapon_mac10" || weaponName == "weapon_mp7" || weaponName == "weapon_mp9" || weaponName == "weapon_mp5sd" || weaponName == "weapon_ump45" || weaponName == "weapon_bizon" || weaponName == "weapon_p90")
+	case 5:
 		sleep = global.features.SMGautosleep;
+		break;
+	}
 
 	return sleep;
 }
