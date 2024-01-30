@@ -6,7 +6,7 @@ class CEntity
 {
 public:
 	CEntity(uintptr_t entity);
-	
+
 	static uintptr_t GetEntityList();
 	static uintptr_t GetPlayerController(uintptr_t entityList, uintptr_t localPlayer, int i);
 	static CEntity* GetpCSPlayerPawn(uintptr_t entityList, uintptr_t playerController, int i);
@@ -23,7 +23,7 @@ public:
 	uintptr_t Bonearray() const noexcept;
 
 	// most used when using bone
-	Vector Feet(uintptr_t bonearray) const noexcept;
+	Vector Feet() const noexcept;
 	Vector Head(uintptr_t bonearray) const noexcept;
 
 	Vector Bone(int bone) const noexcept;

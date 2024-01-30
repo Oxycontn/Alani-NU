@@ -15,6 +15,7 @@ public:
 	CLocal(uintptr_t localPlayerPawn);
 
 	static CLocal* GetLocalPawn();
+	static uintptr_t GetLocalController();
 	static view_matrix_t GetViewMatrix();
 	static Vector2 AimPunchAngle(aimPunchCache AimPunch);
 	static int GetWeaponGroup(std::string weaponName);
@@ -22,7 +23,8 @@ public:
 	int Health() const noexcept;
 	int Team() const noexcept;
 	Vector Position() const noexcept;
-	std::string  GetWeaponNameLocal() const noexcept;
+	int Ping() const noexcept;
+	std::string  GetWeaponNameLocal() const noexcept;;
 	Vector2 ViewAngle() const noexcept;
 	bool Ammo() const noexcept;
 	int ShotsFired() const noexcept;
@@ -32,4 +34,5 @@ public:
 
 private:
 	uintptr_t localPlayerPawn;
+	uintptr_t localPlayerController;
 };

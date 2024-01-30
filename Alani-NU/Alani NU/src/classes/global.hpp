@@ -12,6 +12,7 @@ public:
 	struct features_t
 	{
 		//player entites bools
+		bool worldenable;
 		bool c4;
 		bool molotov;
 		bool smoke;
@@ -148,52 +149,6 @@ public:
 		uintptr_t engine;
 	};
 
-	struct player_t
-	{
-		uintptr_t pCSPlayerPawn;
-		uintptr_t playerPawn;
-		uintptr_t playerController;
-		uintptr_t dwEntityList, listEntry1, listEntry2;
-		
-		int health, team, armor;
-
-		bool IsAlive()
-		{
-			return health > 0 && health <= 100;
-		}
-
-		float flash_alpha;
-
-		Vector feet, boneHead, head;
-
-		uintptr_t gamescene, bonearray;
-
-		std::string weapon = "Invalid";
-		std::string name = "Invalid";
-		std::string healthStr = std::to_string(health); // for use in the ESP later on.
-
-		float circleRadius;
-	};
-
-	struct local_t
-	{
-		uintptr_t localPlayerController, localPlayerPawn;
-
-		int health, team, ping;
-
-		Vector position;
-
-		view_matrix_t vm;
-
-		std::string weaponName;
-	};
-
-	struct world_t
-	{
-		std::string designerName;
-		Vector entityOrigin;
-	};
-
 	struct threads_t
 	{
 		bool stopEsp = false;
@@ -202,9 +157,6 @@ public:
 
 	features_t features;
 	modules_t modules;
-	player_t player;
-	local_t localPlayer;
-	world_t world;
 	threads_t threads;
 };
 inline CGlobals global;

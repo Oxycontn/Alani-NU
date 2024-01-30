@@ -2,7 +2,6 @@
 
 #include "aimbot.h"
 #include "..\classes\global.hpp"
-#include "..\entity\entity.h"
 #include "esp.h"
 #include "..\classes\bone.hpp"
 #include "rcs.h"
@@ -13,7 +12,7 @@ void CAimbot::AimbotThread()
 {
     while (true)
     {
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
 		if (global.threads.stopAimbot)
 			std::terminate();
@@ -28,8 +27,23 @@ void CAimbot::AimbotLoop()
 {
 	uintptr_t entityList = CEntity::GetEntityList();
 	
-	std::string weaponName = global.localPlayer.weaponName;
+	//local player varibles
+	auto localPlayerPawn = CLocal::GetLocalPawn();
+	view_matrix_t viewMatrix = CLocal::GetViewMatrix();
+
+	std::string weaponName = localPlayerPawn->GetWeaponNameLocal();
 	int weaponGroup = CLocal::GetWeaponGroup(weaponName);
+
+	Vector localPos = localPlayerPawn->Position();
+
+	Vector2 viewAngle = localPlayerPawn->ViewAngle();
+	bool ammo = localPlayerPawn->Ammo();
+
+	int shotsFired = localPlayerPawn->ShotsFired();
+	auto fFlags = localPlayerPawn->Flags();
+
+	int localTeam = localPlayerPawn->Team();
+	uintptr_t localPlayerController = CLocal::GetLocalController();
 
 	bool aimbotEnable = AimbotEnable(weaponGroup);
 
@@ -41,7 +55,8 @@ void CAimbot::AimbotLoop()
 				continue;
 
 			//entity varibles
-			auto playerController = CEntity::GetPlayerController(entityList, global.localPlayer.localPlayerController, i);
+			auto playerController = CEntity::GetPlayerController(entityList, localPlayerController, i);
+			auto pc = CEntity::PlayerController(playerController);
 
 			auto pCSPlayerPawn = CEntity::GetpCSPlayerPawn(entityList, playerController, i);
 
@@ -52,30 +67,17 @@ void CAimbot::AimbotLoop()
 
 			int playerTeam = pCSPlayerPawn->Team();
 
-			if (playerTeam == global.localPlayer.team)
+			if (playerTeam == localTeam)
 				continue;
 
 			bool spottedState = pCSPlayerPawn->spottedState();
+
 			uintptr_t bonearray = pCSPlayerPawn->Bonearray();
-			Vector playerPos = pCSPlayerPawn->Feet(bonearray);
-
-			//local player varibles
-			view_matrix_t viewMatrix = CLocal::GetViewMatrix();
-
-			auto localPlayerPawn = CLocal::GetLocalPawn();
-			Vector localPos = localPlayerPawn->Position();
-
-			Vector2 viewAngle = localPlayerPawn->ViewAngle();
-			bool ammo = localPlayerPawn->Ammo();
-
-			int shotsFired = localPlayerPawn->ShotsFired();
-			auto fFlags = localPlayerPawn->Flags();
-
-			Vector2 eyePos = localPlayerPawn->EyePosition();
-			Vector bonePos = AimbotBone(weaponGroup, bonearray);
+			Vector playerPos = pCSPlayerPawn->Feet();
 
 			//settings
 			float aimbotFov = AimbotFov(weaponGroup);
+			Vector bonePos = AimbotBone(weaponGroup, pCSPlayerPawn);
 
 			bool aimbotVisable = AimbotVisable(weaponGroup);
 			int vKey = AimbotKey(weaponGroup);
@@ -136,20 +138,16 @@ void CAimbot::AimbotLoop()
 					}
 
 					aimbotSmooth *= 150;
-
 					Vector2 screenOffset = Vector2::AngleToScreenOffset(yaw, pitch, viewAngle.y, viewAngle.x, aimbotSmooth);
 
 					if (aimbotVisable)
 					{
-						if (spottedState)
+						mouse_event(MOUSEEVENTF_MOVE, static_cast<DWORD>(screenOffset.x), static_cast<DWORD>(screenOffset.y), 0, 0);
+						if (aimbotAuto)
 						{
-							mouse_event(MOUSEEVENTF_MOVE, static_cast<DWORD>(screenOffset.x), static_cast<DWORD>(screenOffset.y), 0, 0);
-							if (aimbotAuto)
-							{
-								mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
-								mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
-								Sleep(aimbotSleep);
-							}
+							mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+							mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+							Sleep(aimbotSleep);
 						}
 					}
 					else
@@ -162,7 +160,6 @@ void CAimbot::AimbotLoop()
 							Sleep(aimbotSleep);
 						}
 					}
-
 				}
 
 				break;
@@ -300,14 +297,14 @@ int CAimbot::AimbotKey(int weaponGroup)
 	return vKey;
 }
 
-Vector CAimbot::AimbotBone(int weaponGroup, uintptr_t bonearray)
+Vector CAimbot::AimbotBone(int weaponGroup, CEntity* pCSPlayerPawn)
 {
 	Vector bone{};
 
-	Vector boneHead = driver.Read<Vector>(bonearray + bones::head * 32);
-	Vector boneNeck = driver.Read<Vector>(bonearray + bones::neck * 32);
-	Vector boneSpine = driver.Read<Vector>(bonearray + bones::spine * 32);
-	Vector boneCock = driver.Read<Vector>(bonearray + bones::cock * 32);
+	Vector boneHead = pCSPlayerPawn->Bone(bones::head);
+	Vector boneNeck = pCSPlayerPawn->Bone(bones::neck);
+	Vector boneSpine = pCSPlayerPawn->Bone(bones::spine);
+	Vector boneCock = pCSPlayerPawn->Bone(bones::cock);
 
 	switch (weaponGroup)
 	{

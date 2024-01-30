@@ -5,6 +5,8 @@
 #include <thread> // threading
 #include <string> // std::to_string
 #include <fstream>
+#include <Dbghelp.h>
+#include <tchar.h>
 
 //for debug console
 #include "../overlay/overlay.hpp"
@@ -20,15 +22,46 @@
 //disableing DSE
 #include "..\dse\disable dse.h"
 
-void StartThreads()
-{
-    std::thread EspThread(&CEntityLoop::EspThread, &entityloop);
-    std::thread AimbotThread(&CAimbot::AimbotThread, &aimbot);
+//for dump
+typedef BOOL(WINAPI* MINIDUMPWRITEDUMP)(HANDLE hProcess, DWORD dwPid, HANDLE hFile, MINIDUMP_TYPE DumpType, CONST PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam, CONST PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam, CONST PMINIDUMP_CALLBACK_INFORMATION CallbackParam);
 
-    EspThread.detach();
-    AimbotThread.detach();
+void CreateMiniDump(struct _EXCEPTION_POINTERS* apExceptionInfo)
+{
+    HMODULE mhLib = ::LoadLibrary(_T("dbghelp.dll"));
+    MINIDUMPWRITEDUMP pDump = (MINIDUMPWRITEDUMP)::GetProcAddress(mhLib, "MiniDumpWriteDump");
+
+    HANDLE  hFile = ::CreateFile(_T("core.dmp"), GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS,
+        FILE_ATTRIBUTE_NORMAL, NULL);
+
+    _MINIDUMP_EXCEPTION_INFORMATION ExInfo;
+    ExInfo.ThreadId = ::GetCurrentThreadId();
+    ExInfo.ExceptionPointers = apExceptionInfo;
+    ExInfo.ClientPointers = FALSE;
+
+    pDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, MiniDumpNormal, &ExInfo, NULL, NULL);
+    ::CloseHandle(hFile);
 }
 
+LONG WINAPI UnhandledHandler(struct _EXCEPTION_POINTERS* apExceptionInfo)
+{
+    //stop threads before unloading driver or a BSOD will occur cause of the driver not stopping pending operations
+    global.threads.stopAimbot = true;
+    global.threads.stopEsp = true;
+    printf("[Dump]Program crahsed, unloading Hook Driver\n");
+
+    //sleep for the threads to terminiate before unloading driver
+    Sleep(200);
+
+    dse.UnLoadHookDriver();
+
+    //then create dump file
+    printf("[Dump]Creating dump file\n");
+    CreateMiniDump(apExceptionInfo);
+
+    return EXCEPTION_CONTINUE_SEARCH;
+}
+
+//for CtrlHandler
 BOOL WINAPI CtrlHandler(DWORD fdwCtrlType)
 {
     switch (fdwCtrlType)
@@ -50,8 +83,20 @@ BOOL WINAPI CtrlHandler(DWORD fdwCtrlType)
     }
 }
 
+void StartThreads()
+{
+    std::thread EspThread(&CEntityLoop::EspThread, &entityloop);
+    std::thread AimbotThread(&CAimbot::AimbotThread, &aimbot);
+
+    EspThread.detach();
+    AimbotThread.detach();
+}
+
 int main()
 {
+    //dump handler
+    SetUnhandledExceptionFilter(UnhandledHandler);
+
     //control handler
     SetConsoleCtrlHandler(CtrlHandler, TRUE);
 

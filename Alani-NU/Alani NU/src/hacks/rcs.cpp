@@ -9,15 +9,15 @@
 
 void CRCS::RcsLoop()
 {
-	std::string weaponName = global.localPlayer.weaponName;
-	int weaponGroup = CLocal::GetWeaponGroup(weaponName);
-
-	auto localPlayerPawn = CLocal::GetLocalPawn();
-	int shotsFired = localPlayerPawn->ShotsFired();
-
-	if (global.features.rcsenable && !aimbot.aimbotRCS)
+	if (global.features.rcsenable)
 	{
-		if (weaponGroup == 1 || weaponGroup == 5)
+		auto localPlayerPawn = CLocal::GetLocalPawn();
+		int shotsFired = localPlayerPawn->ShotsFired();
+
+		std::string weaponName = localPlayerPawn->GetWeaponNameLocal();
+		int weaponGroup = CLocal::GetWeaponGroup(weaponName);
+
+		if (!aimbot.aimbotRCS && weaponGroup == 1 || weaponGroup == 5)
 		{
 			if (shotsFired != 0 && GetAsyncKeyState(VK_LBUTTON))
 			{

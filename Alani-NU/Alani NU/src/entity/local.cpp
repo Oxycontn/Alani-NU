@@ -14,6 +14,11 @@ CLocal* CLocal::GetLocalPawn()
 	return new CLocal(localPlayerPawn);
 }
 
+uintptr_t CLocal::GetLocalController()
+{
+	return driver.Read<uintptr_t>(global.modules.client + offset::dwLocalPlayerController);
+}
+
 view_matrix_t CLocal::GetViewMatrix()
 {
 	return driver.Read<view_matrix_t>(global.modules.client + offset::dwViewMatrix);
@@ -32,6 +37,11 @@ int CLocal::Team() const noexcept
 Vector CLocal::Position() const noexcept
 {
 	return driver.Read<Vector>(localPlayerPawn + offset::Origin);
+}
+
+int CLocal::Ping() const noexcept
+{
+	return driver.Read<int>(localPlayerPawn + offset::m_iPing);
 }
 
 std::string CLocal::GetWeaponNameLocal() const noexcept

@@ -24,16 +24,16 @@ uintptr_t CEntity::GetPlayerController(uintptr_t entityList, uintptr_t localPlay
 
 	if (!list1)
 		return 0;
-	
+
 	auto pc = driver.Read<uintptr_t>(list1 + 120 * (i & 0x1FF));
 
 	if (pc == localPlayer)
 		return 0;
-	
+
 	return pc;
 }
 
-CEntity* CEntity::PlayerController(uintptr_t playerController) 
+CEntity* CEntity::PlayerController(uintptr_t playerController)
 {
 	return new CEntity(playerController);
 }
@@ -79,7 +79,7 @@ uintptr_t CEntity::Bonearray() const noexcept
 	return driver.Read<uintptr_t>(Gamescene() + 0x160 + 0x80);
 }
 
-Vector CEntity::Feet(uintptr_t bonearray) const noexcept
+Vector CEntity::Feet() const noexcept
 {
 	return driver.Read<Vector>(entityAddress + offset::Origin);
 }
@@ -114,7 +114,7 @@ std::string CEntity::GetWeaponName()
 
 	return name;
 }
- 
+
 std::string CEntity::GetPlayerName(uintptr_t playerController)
 {
 	uintptr_t playerNameAddress = driver.Read<uintptr_t>(playerController + offset::m_sSanitizedPlayerName);

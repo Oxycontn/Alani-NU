@@ -2,6 +2,7 @@
 #include <thread>
 #include <string>
 #include "..\math\vector.hpp"
+#include "..\entity\entity.h"
 
 class CAimbot
 {
@@ -13,7 +14,7 @@ public:
 	void AimbotLoop();
 
 	int AimbotKey(int weaponGroup);
-	Vector AimbotBone(int weaponGroup, uintptr_t boneArray);
+	Vector AimbotBone(int weaponGroup, CEntity* pCSPlayerPawn);
 	bool AimbotEnable(int weaponGroup);
 	float AimbotFov(int weaponGroup);
 	bool AimbotVisable(int weaponGroup);

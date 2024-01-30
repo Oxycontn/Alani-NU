@@ -124,10 +124,10 @@ Vector2 Vector2::AngleToScreenOffset(float angleX, float angleY, float previousX
     float fovRad = fov * (M_PI / 180.0f);
 
     double thetaX = (angleX - previousX) * (M_PI / 180.0f);
-    double offsetX = (width * tan(thetaX)) / (1.7 * tan(fovRad / 2));
+    double offsetX = (width * tan(thetaX)) / (2 * tan(fovRad / 2));
 
     double thetaY = (angleY - previousY) * (M_PI / 180.0f);
-    double offsetY = (height * tan(thetaY)) / (1.7 * tan(fovRad / 2));
+    double offsetY = (height * tan(thetaY)) / (2 * tan(fovRad / 2));
 
     return Vector2(-offsetX, offsetY);
 }

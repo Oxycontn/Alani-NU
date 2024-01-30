@@ -1,7 +1,6 @@
 #pragma warning( disable : 4244 4312 4305 )
 
 #include "esp.h"
-#include "..\entity\entity.h"
 
 #include "rcs.h"
 
@@ -44,9 +43,6 @@ void CEntityLoop::EspThread()
         else
             SetWindowLong(overlay.overlay, GWL_EXSTYLE, WS_EX_TOOLWINDOW | WS_EX_TRANSPARENT | WS_EX_LAYERED | WS_EX_TOPMOST);
 
-        //read localplayer
-        ReadLocalPlayer();
-
         //read entites then call render inside loop
         EspLoop();
 
@@ -54,167 +50,144 @@ void CEntityLoop::EspThread()
     }
 }
 
-void CEntityLoop::ReadLocalPlayer()
-{
-    uintptr_t localPlayerController = driver.Read<uintptr_t>(global.modules.client + offset::dwLocalPlayerController);
-    auto localPlayerPawn = CLocal::GetLocalPawn();
-    view_matrix_t vm = CLocal::GetViewMatrix();
-
-    int localTeam = localPlayerPawn->Team();
-    int health = localPlayerPawn->Health();
-
-    std::string weaponName = localPlayerPawn->GetWeaponNameLocal();
-
-    Vector position = localPlayerPawn->Position();
-
-    global.localPlayer.localPlayerController = localPlayerController;
-    global.localPlayer.team = localTeam;
-    global.localPlayer.health = health;
-    global.localPlayer.vm = vm;
-    global.localPlayer.position = position;
-    global.localPlayer.weaponName = weaponName;
-}
-
 void CEntityLoop::EspLoop()
 {
+    //entity list varibles
     uintptr_t entityList = CEntity::GetEntityList();
     int entMax = driver.Read<int>(entityList + offset::dwGameEntitySystem_getHighestEntityIndex);
+
+    //local player varibles
+    auto localPlayerPawn = CLocal::GetLocalPawn();
+    view_matrix_t viewMatrix = CLocal::GetViewMatrix();
+    uintptr_t localPlayerController = CLocal::GetLocalController();
+
+    int localTeam = localPlayerPawn->Team();
+    int localHealth = localPlayerPawn->Health();
+    Vector localPosition = localPlayerPawn->Position();
+    std::string localWeaponName = localPlayerPawn->GetWeaponNameLocal();
 
     for (int i = 1; i < entMax; ++i)
     {
         if (overlay.RenderMenu)
             continue;
 
-        uintptr_t playerController = CEntity::GetPlayerController(entityList, global.localPlayer.localPlayerController, i);
+        uintptr_t playerController = CEntity::GetPlayerController(entityList, localPlayerController, i);
         auto pc = CEntity::PlayerController(playerController);
 
         //plyer entities
         if (i <= 64)
         {
-            auto pCSPlayerPawn = CEntity::GetpCSPlayerPawn(entityList, playerController, i);
+            if (global.features.teamenable || global.features.enemyenable)
+            {
+                auto pCSPlayerPawn = CEntity::GetpCSPlayerPawn(entityList, playerController, i);
 
-            int health = pCSPlayerPawn->Health();
-            int playerTeam = pCSPlayerPawn->Team();
-            int armor = pCSPlayerPawn->Armor();
+                int playerHealth = pCSPlayerPawn->Health();
+                int playerTeam = pCSPlayerPawn->Team();
+                int playerArmor = pCSPlayerPawn->Armor();
 
-            if (health <= 0 || health > 100)
-                continue;
+                if (playerHealth <= 0 || playerHealth > 100)
+                    continue;
 
-            if (global.features.glowEnemy) {
-                //glow
+                uintptr_t gamescene = pCSPlayerPawn->Gamescene();
+                uintptr_t bonearray = pCSPlayerPawn->Bonearray();
+
+                Vector readFeet = pCSPlayerPawn->Feet();
+                Vector readBoneHead = pCSPlayerPawn->Bone(bones::head);
+
+                // made a wrapper for everything below but it was bugging out, not sure why. we'll keep this here for now i guess.
+                Vector head;
+
+                head.x = readFeet.x;
+                head.y = readFeet.y;
+                head.z = readFeet.z + 75.f;
+
+                std::string playerName = CEntity::GetPlayerName(playerController);
+                std::string weaponName = pCSPlayerPawn->GetWeaponName();
+
+                RenderEsp(viewMatrix, readBoneHead, readFeet, head, localPosition, weaponName, localTeam, playerTeam, playerName, playerArmor, playerHealth, pCSPlayerPawn);
             }
-            if (global.features.glowTeam) {
-                // glow 
-            }
-
-            uintptr_t gamescene = pCSPlayerPawn->Gamescene();
-            uintptr_t bonearray = pCSPlayerPawn->Bonearray();
-
-            Vector readFeet = pCSPlayerPawn->Feet(bonearray);
-            Vector readBoneHead = pCSPlayerPawn->Bone(bones::head);
-
-            // made a wrapper for everything below but it was bugging out, not sure why. we'll keep this here for now i guess.
-            Vector head;
-
-            head.x = readFeet.x;
-            head.y = readFeet.y;
-            head.z = readFeet.z + 75.f;
-
-            std::string playerName = CEntity::GetPlayerName(playerController);
-            std::string weaponName = pCSPlayerPawn->GetWeaponName();
-
-            global.player.health = health;
-            global.player.team = playerTeam; 
-            global.player.armor = armor;
-            global.player.feet = readFeet;
-            global.player.boneHead = readBoneHead;
-            global.player.head = head;
-            global.player.gamescene = gamescene;
-            global.player.bonearray = bonearray;
-            global.player.name = playerName;
-            global.player.weapon = weaponName;
-
-            RenderEsp();
         }
 
         //world entities
         if (i >= 65)
         {
-            auto entityController = CWEntity::EntityController(playerController);
+            if (global.features.worldenable)
+            {
+                auto entityController = CWEntity::EntityController(playerController);
 
-            auto entityOwner = entityController->EntityOwner();
-            if (entityOwner != -1)
-                continue;
+                auto entityOwner = entityController->EntityOwner();
+                if (entityOwner != -1)
+                    continue;
 
-            auto pEntity = entityController->PEntity();
+                auto pEntity = entityController->PEntity();
 
-            auto designerNameptr = CWEntity::DesignerNamePtr(pEntity);
+                auto designerNameptr = CWEntity::DesignerNamePtr(pEntity);
 
-            std::string designerName = CWEntity::ReadDesignerName(designerNameptr);
+                std::string designerName = CWEntity::ReadDesignerName(designerNameptr);
 
-            if (designerName.find("weapon"))
-                continue;
+                if (designerName.find("weapon"))
+                    continue;
 
-            auto gameScene = entityController->Gamescene();
+                auto gameScene = entityController->Gamescene();
 
-            Vector entityOrigin = CWEntity::EntityPosition(gameScene);
+                Vector entityOrigin = CWEntity::EntityPosition(gameScene);
 
-            global.world.designerName = designerName;
-            global.world.entityOrigin = entityOrigin;
-
-            RenderWorld();
+                RenderWorld(localPosition, entityOrigin, viewMatrix, designerName);
+            }
         }
 
-        RenderFov();
+        RenderFov(localWeaponName);
     }
 }
 
-void CEntityLoop::Bone()
+void CEntityLoop::Bone(view_matrix_t viewMatrix, int localTeam, int playerTeam, Vector feet, Vector head, CEntity* pCSPlayerPawn)
 {
+    int circleRadius = abs(feet.y - head.y) / 80;
+
     for (int i = 0; i < sizeof(boneConnections) / sizeof(boneConnections[0]); ++i)
     {
         int bone1 = boneConnections[i].bone1;
         int bone2 = boneConnections[i].bone2;
 
-        Vector VectorBone1 = driver.Read<Vector>(global.player.bonearray + bone1 * 32);
-        Vector VectorBone2 = driver.Read<Vector>(global.player.bonearray + bone2 * 32);
+        Vector VectorBone1 = pCSPlayerPawn->Bone(bone1);
+        Vector VectorBone2 = pCSPlayerPawn->Bone(bone2);
 
         Vector b1;
         Vector b2;
 
-        if (Vector::WTS(global.localPlayer.vm, VectorBone1, b1) &&
-            Vector::WTS(global.localPlayer.vm, VectorBone2, b2))
+        if (Vector::WTS(viewMatrix, VectorBone1, b1) &&
+            Vector::WTS(viewMatrix, VectorBone2, b2))
         {
-            if (global.localPlayer.team == global.player.team)
+            if (localTeam == playerTeam)
             {
                 Render::Line(b1.x, b1.y, b2.x, b2.y, global.features.teamBoneColor, global.features.teamBoneAlpha, 1.5);
                 if (global.features.teamJoint)
-                    Render::Circle(b2.x, b2.y, global.player.circleRadius, white, 255, true);
+                    Render::Circle(b2.x, b2.y, circleRadius, white, 255, true);
             }
-            else if (global.localPlayer.team != global.player.team)
+            else if (localTeam != playerTeam)
             {
                 Render::Line(b1.x, b1.y, b2.x, b2.y, global.features.enemyBoneColor, global.features.enemyBoneAlpha, 1.5);
                 if (global.features.enemyJoint)
-                    Render::Circle(b2.x, b2.y, global.player.circleRadius, white, 255, true);
+                    Render::Circle(b2.x, b2.y, circleRadius, white, 255, true);
             }
         }
     }
 }
 
 //render
-void CEntityLoop::RenderWorld()
+void CEntityLoop::RenderWorld(Vector localPos, Vector entityPos, view_matrix_t viewMatrix, std::string designerName)
 {
     Vector entity;
 
-    if (Vector::WTS(global.localPlayer.vm, global.world.entityOrigin, entity))
+    if (Vector::WTS(viewMatrix, entityPos, entity))
     {
-        float distance = global.localPlayer.position.CalculateDistance(entity) / 500;
+        float distance = localPos.CalculateDistance(entity) / 500;
         float fontSize = 100.f / distance;
-        std::string weaponName = global.world.designerName.substr(7);
+        std::string weaponName = designerName.substr(7);
 
         if (global.features.weapon)
         {
-            if (global.world.designerName.find("weapon_molotov" || "weapon_decoy" || "weapon_flashbang" || "weapon_hegrenade" || "weapon_smokegrenade" || "weapon_incgrenade"))
+            if (designerName.find("weapon_molotov" || "weapon_decoy" || "weapon_flashbang" || "weapon_hegrenade" || "weapon_smokegrenade" || "weapon_incgrenade"))
             {
                 Render::Text(fontSize, entity.x - 10, entity.y + 10, white, 255, weaponName);
                 Render::Rect(entity.x - 10, entity.y - 10, 40, 20, white, 255, 1.5);
@@ -223,7 +196,7 @@ void CEntityLoop::RenderWorld()
 
         if (global.features.molotov)
         {
-            if (!global.world.designerName.find("weapon_molotov"))
+            if (!designerName.find("weapon_molotov"))
             {
                 Render::Text(fontSize, entity.x - 10, entity.y + 10, white, 255, weaponName);
                 Render::Rect(entity.x - 10, entity.y - 10, 40, 20, white, 255, 1.5);
@@ -232,7 +205,7 @@ void CEntityLoop::RenderWorld()
 
         if (global.features.incgrenade)
         {
-            if (!global.world.designerName.find("weapon_incgrenade"))
+            if (!designerName.find("weapon_incgrenade"))
             {
                 Render::Text(fontSize, entity.x - 10, entity.y + 10, white, 255, weaponName);
                 Render::Rect(entity.x - 10, entity.y - 10, 40, 20, white, 255, 1.5);
@@ -241,7 +214,7 @@ void CEntityLoop::RenderWorld()
 
         if (global.features.decoy)
         {
-            if (!global.world.designerName.find("weapon_decoy"))
+            if (!designerName.find("weapon_decoy"))
             {
                 Render::Text(fontSize, entity.x - 10, entity.y + 10, white, 255, weaponName);
                 Render::Rect(entity.x - 10, entity.y - 10, 40, 20, white, 255, 1.5);
@@ -250,7 +223,7 @@ void CEntityLoop::RenderWorld()
 
         if (global.features.flash)
         {
-            if (!global.world.designerName.find("weapon_flashbang"))
+            if (!designerName.find("weapon_flashbang"))
             {
                 Render::Text(fontSize, entity.x - 10, entity.y + 10, white, 255, weaponName);
                 Render::Rect(entity.x - 10, entity.y - 10, 40, 20, white, 255, 1.5);
@@ -259,7 +232,7 @@ void CEntityLoop::RenderWorld()
 
         if (global.features.grenade)
         {
-            if (!global.world.designerName.find("weapon_hegrenade"))
+            if (!designerName.find("weapon_hegrenade"))
             {
                 Render::Text(fontSize, entity.x - 10, entity.y + 10, white, 255, weaponName);
                 Render::Rect(entity.x - 10, entity.y - 10, 40, 20, white, 255, 1.5);
@@ -268,7 +241,7 @@ void CEntityLoop::RenderWorld()
 
         if (global.features.smoke)
         {
-            if (!global.world.designerName.find("weapon_smokegrenade"))
+            if (!designerName.find("weapon_smokegrenade"))
             {
                 Render::Text(fontSize, entity.x - 10, entity.y + 10, white, 255, weaponName);
                 Render::Rect(entity.x - 10, entity.y - 10, 40, 20, white, 255, 1.5);
@@ -277,7 +250,7 @@ void CEntityLoop::RenderWorld()
 
         if (global.features.c4)
         {
-            if (!global.world.designerName.find("weapon_c4"))
+            if (!designerName.find("weapon_c4"))
             {
                 Render::Text(fontSize, entity.x - 10, entity.y + 10, white, 255, weaponName);
                 Render::Rect(entity.x - 10, entity.y - 10, 40, 20, white, 255, 1.5);
@@ -286,21 +259,21 @@ void CEntityLoop::RenderWorld()
     }
 }
 
-void CEntityLoop::RenderEsp()
+void CEntityLoop::RenderEsp(view_matrix_t viewMatrix, Vector playerBoneHead, Vector playerFeet, Vector playerHead, Vector localPos, std::string weaponName, int localTeam, int playerTeam, std::string playerName, int armorValue, int healthValue, CEntity* pCSPlayerPawn)
 {
     Vector feet;
     Vector head;
     Vector boneHead;
 
-    if (Vector::WTS(global.localPlayer.vm, global.player.boneHead, boneHead) &&
-        Vector::WTS(global.localPlayer.vm, global.player.feet, feet) &&
-        Vector::WTS(global.localPlayer.vm, global.player.head, head))
+    if (Vector::WTS(viewMatrix, playerBoneHead, boneHead) &&
+        Vector::WTS(viewMatrix, playerFeet, feet) &&
+        Vector::WTS(viewMatrix, playerHead, head))
     {
         float height = (feet.y - boneHead.y) * 1.35;
         float width = height / 1.5f;
 
-        float feetDistance = global.localPlayer.position.CalculateDistance(feet);
-        float headDistance = global.localPlayer.position.CalculateDistance(head);
+        float feetDistance = localPos.CalculateDistance(feet);
+        float headDistance = localPos.CalculateDistance(head);
 
         float textDistance = feetDistance / headDistance;
 
@@ -308,23 +281,18 @@ void CEntityLoop::RenderEsp()
 
         std::string weaponName;
 
-        if (!global.player.weapon.find("weapon_"))
-        {
-            weaponName = global.player.weapon;
+        if (!weaponName.find("weapon_"))
             weaponName = weaponName.substr(7);
-        }
 
-        global.player.circleRadius = abs(feet.y - head.y) / 80;
-
-        float Rbar = min((2.0f * (100 - global.player.health)) / 100.0f, 1.0f);
-        float Gbar = min((2.0f * global.player.health) / 100.0f, 1.0f);
+        float Rbar = min((2.0f * (100 - healthValue)) / 100.0f, 1.0f);
+        float Gbar = min((2.0f * healthValue) / 100.0f, 1.0f);
         RGB healthBr = { Rbar, Gbar, 0 };
 
         //team esp
-        if (global.localPlayer.team == global.player.team)
+        if (localTeam == playerTeam && global.features.teamenable)
         {
             //2d box
-            if (global.features.teamcombo == 1 && global.features.teamenable)
+            if (global.features.teamcombo == 1)
             {
                 Render::RectFilled(
                     feet.x - width / 2,
@@ -366,7 +334,7 @@ void CEntityLoop::RenderEsp()
             //bone esp
             if (global.features.teamskel)
             {
-                entityloop.Bone();
+                entityloop.Bone(viewMatrix, localTeam, playerTeam, feet, head, pCSPlayerPawn);
             }
 
             //head
@@ -403,9 +371,9 @@ void CEntityLoop::RenderEsp()
                 //health render
                 Render::RectFilled(
                     feet.x - (width / 1.78),
-                    head.y + (height * (100 - global.player.health) / 100),
+                    head.y + (height * (100 - healthValue) / 100),
                     width / 40,
-                    height - (height * (100 - global.player.health) / 100),
+                    height - (height * (100 - healthValue) / 100),
                     healthBr,
                     200
                 );
@@ -427,9 +395,9 @@ void CEntityLoop::RenderEsp()
                 //armor render
                 Render::RectFilled(
                     feet.x + (width / 1.890),
-                    head.y + (height * (100 - global.player.armor) / 100),
+                    head.y + (height * (100 - armorValue) / 100),
                     width / 40,
-                    height - (height * (100 - global.player.armor) / 100),
+                    height - (height * (100 - armorValue) / 100),
                     blue,
                     200
                 );
@@ -444,15 +412,15 @@ void CEntityLoop::RenderEsp()
             //name
             if (global.features.teamname)
             {
-                Render::Text(10.f / textDistance, feet.x - width / 2, head.y - 10, white, 255, global.player.name);
+                Render::Text(10.f / textDistance, feet.x - width / 2, head.y - 10, white, 255, playerName);
             }
         }
 
         //enemy esp
-        if (global.localPlayer.team != global.player.team)
+        if (localTeam != playerTeam && global.features.enemyenable)
         {
             //2d box
-            if (global.features.enemycombo == 1 && global.features.enemyenable)
+            if (global.features.enemycombo == 1)
             {
                 Render::RectFilled(
                     feet.x - width / 2,
@@ -495,7 +463,7 @@ void CEntityLoop::RenderEsp()
             //bone esp
             if (global.features.enemyskel)
             {
-                entityloop.Bone();
+                entityloop.Bone(viewMatrix, localTeam, playerTeam, feet, head, pCSPlayerPawn);
             }
 
             //head
@@ -532,9 +500,9 @@ void CEntityLoop::RenderEsp()
                 //health render
                 Render::RectFilled(
                     feet.x - (width / 1.78),
-                    head.y + (height * (100 - global.player.health) / 100),
+                    head.y + (height * (100 - healthValue) / 100),
                     width / 40,
-                    height - (height * (100 - global.player.health) / 100),
+                    height - (height * (100 - healthValue) / 100),
                     healthBr,
                     200
                 );
@@ -556,9 +524,9 @@ void CEntityLoop::RenderEsp()
                 //armor render
                 Render::RectFilled(
                     feet.x + (width / 1.890),
-                    head.y + (height * (100 - global.player.armor) / 100),
+                    head.y + (height * (100 - armorValue) / 100),
                     width / 40,
-                    height - (height * (100 - global.player.armor) / 100),
+                    height - (height * (100 - armorValue) / 100),
                     blue,
                     200
                 );
@@ -573,16 +541,15 @@ void CEntityLoop::RenderEsp()
             //name
             if (global.features.enemyname)
             {
-                Render::Text(10.f / textDistance, feet.x - width / 2, head.y - 10, white, 255, global.player.name);
+                Render::Text(10.f / textDistance, feet.x - width / 2, head.y - 10, white, 255, playerName);
             }
         }
     }
 }
 
-void CEntityLoop::RenderFov()
+void CEntityLoop::RenderFov(std::string localWeaponName)
 {
-    std::string weaponName = global.localPlayer.weaponName;
-    int weaponGroup = CLocal::GetWeaponGroup(weaponName);
+    int weaponGroup = CLocal::GetWeaponGroup(localWeaponName);
 
     //AR
     if (weaponGroup == 1)
