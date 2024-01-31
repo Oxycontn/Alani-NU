@@ -106,13 +106,11 @@ int main()
     debug.ShowConsole();
 
     //driver needs to be loaded before cs2 is open
-    /*
     if (FindWindow(NULL, "Counter-Strike 2") != NULL)
     {
         MessageBoxA(NULL, "CS2 Needs to be closed to load the driver Properly. Close CS2 and re-launch Alani-NU!", "Alani-NU", MB_OK | MB_ICONQUESTION);
         return 0;
     }
-    */
 
     //we need to disable DSE then we load the Driver!
     bool results = dse.LoadGigDriver();
