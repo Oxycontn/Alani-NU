@@ -33,9 +33,9 @@ public:
 	NTSTATUS GetGCiOffset(ULONG_PTR CipIntitalize, ULONG_PTR CiDllBase, PVOID CiMap, PULONG_PTR g_CiOptionsAddress);
 	NTSTATUS FinalCalculation(PVOID* g_CiOptionsAddress);
 	NTSTATUS DisableDSE(PVOID g_CiOptionsAddress, HANDLE driverHandle);
-	bool LoadHookDriver();
+	bool LoadIOCTLDriver();
 	NTSTATUS EnableDSE(PVOID g_CiOptionsAddress,HANDLE driverHandle);
 	bool UnLoadGigDriver();
-	bool UnLoadHookDriver();
+	bool UnLoadIOCTLDriver();
 };
 inline DSE dse;

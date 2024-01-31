@@ -52,7 +52,7 @@ LONG WINAPI UnhandledHandler(struct _EXCEPTION_POINTERS* apExceptionInfo)
     //sleep for the threads to terminiate before unloading driver
     Sleep(200);
 
-    dse.UnLoadHookDriver();
+    dse.UnLoadIOCTLDriver();
 
     //then create dump file
     printf("[Dump]Creating dump file\n");
@@ -74,12 +74,14 @@ BOOL WINAPI CtrlHandler(DWORD fdwCtrlType)
 
         //sleep for the threads to terminiate before unloading driver
         Sleep(200);
+        dse.UnLoadIOCTLDriver();
 
-        dse.UnLoadHookDriver();
         return TRUE;
+        break;
 
     default:
         return FALSE;
+        break;
     }
 }
 
@@ -104,12 +106,14 @@ int main()
     debug.ShowConsole();
 
     //driver needs to be loaded before cs2 is open
+    /*
     if (FindWindow(NULL, "Counter-Strike 2") != NULL)
     {
         MessageBoxA(NULL, "CS2 Needs to be closed to load the driver Properly. Close CS2 and re-launch Alani-NU!", "Alani-NU", MB_OK | MB_ICONQUESTION);
         return 0;
     }
-	
+    */
+
     //we need to disable DSE then we load the Driver!
     bool results = dse.LoadGigDriver();
 
@@ -136,7 +140,7 @@ int main()
             goto GoToPause;
 
         //now load hook driver
-        results = dse.LoadHookDriver();
+        results = dse.LoadIOCTLDriver();
         if (!results)
             goto GoToPause;
 
@@ -160,7 +164,7 @@ int main()
     }
 
     //now since the driver is loaded open up cs2!
-    printf("[CS2]You may now load CS2\n");
+    printf("[CS2]You may now load CS2, in Fullscreen Window Mode\n");
     MessageBoxA(NULL, "Driver loaded Properly! You may now open up CS2.", "Alani-NU", MB_OK | MB_ICONQUESTION);
 
     //wait for cs2 to open
@@ -171,13 +175,16 @@ int main()
 
     Sleep(4000);
 
+    //get handle to driver
+    driver.hDriver = CreateFile("\\\\.\\KernalDriver", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, 0);
+
     //get pid and call for dlls
-    driver.pid = driver.GetProcesByName("cs2.exe");
+    driver.pid = driver.GetProcessId();
     printf("[CS2]PID : %d\n", driver.pid);
 
-    global.modules.engine = driver.GetDllBase("engine2.dll");
+    global.modules.engine = driver.GetEngineAddress();
     printf("[CS2]Engine : %p\n", global.modules.engine);
-    global.modules.client = driver.GetDllBase("client.dll");
+    global.modules.client = driver.GetClientAddress();
     printf("[CS2]Cleint : %p\n", global.modules.client);
 
     //start threads
@@ -202,8 +209,8 @@ int main()
     //sleep for the threads to terminiate before unloading driver
     Sleep(200);
 
-    //unload hook driver
-    dse.UnLoadHookDriver();
+    //unload ioctl driver
+    dse.UnLoadIOCTLDriver();
 
     //destory overlay
     overlay.DestroyOverlay();

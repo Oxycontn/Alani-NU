@@ -63,9 +63,6 @@
     <ClCompile Include="src\dse\disable dse.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\mem\memory.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\entity\local.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -160,7 +157,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="HookDriver.sys" />
-    <None Include="gdrv.sys" />
+    <None Include="GigabyteDriver.sys" />
+    <None Include="IOCTLDriver.sys" />
   </ItemGroup>
 </Project>

@@ -13,7 +13,7 @@ bool DSE::LoadGigDriver()
 	TCHAR szDriverImagePath[256];
 	bool results = false;
 
-	GetFullPathName(TEXT("gdrv.sys"), 256, szDriverImagePath, &fileExt);
+	GetFullPathName(TEXT("GigabyteDriver.sys"), 256, szDriverImagePath, &fileExt);
 
 	SC_HANDLE hServiceMgr = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
 
@@ -289,36 +289,36 @@ NTSTATUS DSE::DisableDSE(PVOID g_CiOptionsAddress, HANDLE driverHandle)
 	}
 }
 
-bool DSE::LoadHookDriver()
+bool DSE::LoadIOCTLDriver()
 {
 	TCHAR* fileExt;
 	TCHAR szDriverImagePath[256];
 	bool results = false;
 
-	GetFullPathName(TEXT("HookDriver.sys"), 256, szDriverImagePath, &fileExt);
+	GetFullPathName(TEXT("IOCTLDriver.sys"), 256, szDriverImagePath, &fileExt);
 
 	SC_HANDLE hServiceMgr = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
 
 	if (!hServiceMgr)
 	{
-		printf("[Hook]OpenSCManager Failed %d\n", GetLastError());
+		printf("[IOCTL]OpenSCManager Failed %d\n", GetLastError());
 		results = FALSE;
 	}
 
-	SC_HANDLE hServiceDDK = CreateService(hServiceMgr,"Hookdriver", "Hookdriver", SERVICE_ALL_ACCESS, SERVICE_KERNEL_DRIVER, SERVICE_DEMAND_START, SERVICE_ERROR_IGNORE, szDriverImagePath, NULL, NULL, NULL, NULL, NULL);
+	SC_HANDLE hServiceDDK = CreateService(hServiceMgr,"IOCTLdriver", "IOCTLdriver", SERVICE_ALL_ACCESS, SERVICE_KERNEL_DRIVER, SERVICE_DEMAND_START, SERVICE_ERROR_IGNORE, szDriverImagePath, NULL, NULL, NULL, NULL, NULL);
 
 	if (!hServiceDDK)
 	{
 		if (GetLastError() != ERROR_IO_PENDING && GetLastError() != ERROR_SERVICE_EXISTS)
 		{
-			printf("[Hook]CrateService Failed %d\n", GetLastError());
+			printf("[IOCTL]CrateService Failed %d\n", GetLastError());
 			results = FALSE;
 		}
 
-		hServiceDDK = OpenService(hServiceMgr, "Hookdriver", SERVICE_ALL_ACCESS);
+		hServiceDDK = OpenService(hServiceMgr, "IOCTLdriver", SERVICE_ALL_ACCESS);
 		if (!hServiceDDK)
 		{
-			printf("[Hook]OpenService Failed %d\n", GetLastError());
+			printf("[IOCTL]OpenService Failed %d\n", GetLastError());
 			results = FALSE;
 		}
 	}
@@ -328,7 +328,7 @@ bool DSE::LoadHookDriver()
 	{
 		if (GetLastError() != ERROR_IO_PENDING && GetLastError() != ERROR_SERVICE_ALREADY_RUNNING)
 		{
-			printf("[Hook]StartService Failed %d\n", GetLastError());
+			printf("[IOCTL]StartService Failed %d\n", GetLastError());
 			results = FALSE;
 		}
 		else
@@ -339,7 +339,7 @@ bool DSE::LoadHookDriver()
 	CloseServiceHandle(hServiceMgr);
 
 	if (results)
-		printf("[Hook]Loaded Hook Driver\n");
+		printf("[IOCTL]Loaded IOCTL Driver\n");
 
 	return results;
 }
@@ -400,7 +400,20 @@ bool DSE::UnLoadGigDriver()
 	else
 	{
 		results = TRUE;
-		printf("[GDRV]Giagabyte Driver Unloaded!\n");
+		printf("[GDRV]Giagabyte Driver Unloaded\n");
+	}
+
+	results = DeleteService(hServiceDDK);
+
+	if (!results)
+	{
+		results = FALSE;
+		printf("[GDRV]DeleteService Failed %d\n", GetLastError());
+	}
+	else
+	{
+		results = TRUE;
+		printf("[GDRV]Giagabyte Driver Service Deleted\n");
 	}
 
 	CloseServiceHandle(hServiceDDK);
@@ -409,7 +422,7 @@ bool DSE::UnLoadGigDriver()
 	return results;
 }
 
-bool DSE::UnLoadHookDriver()
+bool DSE::UnLoadIOCTLDriver()
 {
 	SERVICE_STATUS_PROCESS ssp;
 	bool results;
@@ -418,14 +431,14 @@ bool DSE::UnLoadHookDriver()
 
 	if (!hServiceMgr)
 	{
-		printf("[Hook]OpenSCManager Failed %d\n", GetLastError());
+		printf("[IOCTL]OpenSCManager Failed %d\n", GetLastError());
 		results = FALSE;
 	}
 
-	SC_HANDLE hServiceDDK = OpenService(hServiceMgr, "Hookdriver", SERVICE_ALL_ACCESS);
+	SC_HANDLE hServiceDDK = OpenService(hServiceMgr, "IOCTLdriver", SERVICE_ALL_ACCESS);
 	if (!hServiceDDK)
 	{
-		printf("[Hook]OpenService Failed %d\n", GetLastError());
+		printf("[IOCTL]OpenService Failed %d\n", GetLastError());
 		results = FALSE;
 	}
 
@@ -434,12 +447,25 @@ bool DSE::UnLoadHookDriver()
 	if (!results)
 	{
 		results = FALSE;
-		printf("[Hook]ControlService Failed %d\n", GetLastError());
+		printf("[IOCTL]ControlService Failed %d\n", GetLastError());
 	}
 	else
 	{
 		results = TRUE;
-		printf("[Hook]Hook Driver Unloaded!\n");
+		printf("[IOCTL]IOCTL Driver Unloaded!\n");
+	}
+
+	results = DeleteService(hServiceDDK);
+
+	if (!results)
+	{
+		results = FALSE;
+		printf("[IOCTL]DeleteService Failed %d\n", GetLastError());
+	}
+	else
+	{
+		results = TRUE;
+		printf("[IOCTL]IOCTL Driver Service Deleted\n");
 	}
 
 	CloseServiceHandle(hServiceDDK);
