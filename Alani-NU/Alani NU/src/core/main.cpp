@@ -44,15 +44,10 @@ void CreateMiniDump(struct _EXCEPTION_POINTERS* apExceptionInfo)
 
 LONG WINAPI UnhandledHandler(struct _EXCEPTION_POINTERS* apExceptionInfo)
 {
-    //stop threads before unloading driver or a BSOD will occur cause of the driver not stopping pending operations
-    global.threads.stopAimbot = true;
-    global.threads.stopEsp = true;
     printf("[Dump]Program crahsed, unloading Hook Driver\n");
-
-    //sleep for the threads to terminiate before unloading driver
-    Sleep(200);
-
     dse.UnLoadIOCTLDriver();
+    overlay.DestroyOverlay();
+    overlay.DestroyDevice();
 
     //then create dump file
     printf("[Dump]Creating dump file\n");
@@ -67,15 +62,11 @@ BOOL WINAPI CtrlHandler(DWORD fdwCtrlType)
     switch (fdwCtrlType)
     {
     case CTRL_CLOSE_EVENT:
-        //stop threads before unloading driver or a BSOD will occur cause of the driver not stopping pending operations
-        global.threads.stopAimbot = true;
-        global.threads.stopEsp = true;
         printf("[Console]Console Closing\n");
-
-        //sleep for the threads to terminiate before unloading driver
-        Sleep(200);
         dse.UnLoadIOCTLDriver();
-
+        overlay.DestroyOverlay();
+        overlay.DestroyDevice();
+        system("pause");
         return TRUE;
         break;
 
@@ -140,7 +131,10 @@ int main()
         //now load hook driver
         results = dse.LoadIOCTLDriver();
         if (!results)
+        {
+            dse.EnableDSE(g_CiOptionAddress, ghDriver);
             goto GoToPause;
+        }
 
         //now enable dse
         status = dse.EnableDSE(g_CiOptionAddress, ghDriver);
@@ -200,23 +194,14 @@ int main()
     //exit calls
     printf("[CS2]Exiting\n");
 
-    //stop threads before unloading driver or a BSOD will occur cause of the driver not stopping pending operations
-    global.threads.stopAimbot = true;
-    global.threads.stopEsp = true;
-
-    //sleep for the threads to terminiate before unloading driver
-    Sleep(200);
-
     //unload ioctl driver
     dse.UnLoadIOCTLDriver();
 
     //destory overlay
     overlay.DestroyOverlay();
-    overlay.DestroyImGui();
-    overlay.DestroyOverlay();
+    overlay.DestroyDevice();
 
     system("pause");
-
 	return 0;
 
 GoToPause:

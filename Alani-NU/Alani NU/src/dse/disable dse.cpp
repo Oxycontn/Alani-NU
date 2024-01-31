@@ -452,7 +452,7 @@ bool DSE::UnLoadIOCTLDriver()
 	else
 	{
 		results = TRUE;
-		printf("[IOCTL]IOCTL Driver Unloaded!\n");
+		printf("[IOCTL]IOCTL Driver Unloaded\n");
 	}
 
 	results = DeleteService(hServiceDDK);

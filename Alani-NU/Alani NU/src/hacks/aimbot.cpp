@@ -14,9 +14,6 @@ void CAimbot::AimbotThread()
     {
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
-		if (global.threads.stopAimbot)
-			std::terminate();
-
         AimbotLoop();
 
 		rcs.RcsLoop();
@@ -142,12 +139,15 @@ void CAimbot::AimbotLoop()
 
 					if (aimbotVisable)
 					{
-						mouse_event(MOUSEEVENTF_MOVE, static_cast<DWORD>(screenOffset.x), static_cast<DWORD>(screenOffset.y), 0, 0);
-						if (aimbotAuto)
+						if (spottedState)
 						{
-							mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
-							mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
-							Sleep(aimbotSleep);
+							mouse_event(MOUSEEVENTF_MOVE, static_cast<DWORD>(screenOffset.x), static_cast<DWORD>(screenOffset.y), 0, 0);
+							if (aimbotAuto)
+							{
+								mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+								mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+								Sleep(aimbotSleep);
+							}
 						}
 					}
 					else
@@ -601,7 +601,7 @@ int CAimbot::AimbotDistance(int weaponGroup)
 		distance = global.features.PSaimbotdistance;
 		break;
 
-	case 41:
+	case 4:
 		distance = global.features.SRaimbotdistance;
 		break;
 

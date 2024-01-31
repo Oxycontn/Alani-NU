@@ -25,9 +25,6 @@ void CEntityLoop::EspThread()
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
-        if (global.threads.stopEsp)
-            std::terminate();
-
         overlay.StartRender();
 
         //menu calls
@@ -94,6 +91,8 @@ void CEntityLoop::EspLoop()
                 Vector readFeet = pCSPlayerPawn->Feet();
                 Vector readBoneHead = pCSPlayerPawn->Bone(bones::head);
 
+                bool spottedState = pCSPlayerPawn->spottedState();
+
                 // made a wrapper for everything below but it was bugging out, not sure why. we'll keep this here for now i guess.
                 Vector head;
 
@@ -104,7 +103,7 @@ void CEntityLoop::EspLoop()
                 std::string playerName = CEntity::GetPlayerName(playerController);
                 std::string weaponName = pCSPlayerPawn->GetWeaponName();
 
-                RenderEsp(viewMatrix, readBoneHead, readFeet, head, localPosition, weaponName, localTeam, playerTeam, playerName, playerArmor, playerHealth, pCSPlayerPawn);
+                RenderEsp(viewMatrix, readBoneHead, readFeet, head, localPosition, weaponName, localTeam, playerTeam, playerName, playerArmor, playerHealth, pCSPlayerPawn, spottedState);
             }
         }
 
@@ -259,7 +258,7 @@ void CEntityLoop::RenderWorld(Vector localPos, Vector entityPos, view_matrix_t v
     }
 }
 
-void CEntityLoop::RenderEsp(view_matrix_t viewMatrix, Vector playerBoneHead, Vector playerFeet, Vector playerHead, Vector localPos, std::string weaponName, int localTeam, int playerTeam, std::string playerName, int armorValue, int healthValue, CEntity* pCSPlayerPawn)
+void CEntityLoop::RenderEsp(view_matrix_t viewMatrix, Vector playerBoneHead, Vector playerFeet, Vector playerHead, Vector localPos, std::string weaponName, int localTeam, int playerTeam, std::string playerName, int armorValue, int healthValue, CEntity* pCSPlayerPawn, bool spottedState)
 {
     Vector feet;
     Vector head;
@@ -294,41 +293,107 @@ void CEntityLoop::RenderEsp(view_matrix_t viewMatrix, Vector playerBoneHead, Vec
             //2d box
             if (global.features.teamcombo == 1)
             {
-                Render::RectFilled(
-                    feet.x - width / 2,
-                    head.y,
-                    width,
-                    height,
-                    global.features.teaamcolor,
-                    global.features.teamalpha);
+                if (global.features.teamVisable)
+                {
+                    if (spottedState)
+                    {
+                        Render::RectFilled(
+                            feet.x - width / 2,
+                            head.y,
+                            width,
+                            height,
+                            global.features.teamvisablecolor,
+                            global.features.teamalpha);
 
-                Render::Rect(
-                    feet.x - width / 2,
-                    head.y,
-                    width,
-                    height,
-                    white,
-                    255,
-                    1.5);
-            }
+                        Render::Rect(
+                            feet.x - width / 2,
+                            head.y,
+                            width,
+                            height,
+                            white,
+                            255,
+                            1.5);
+                    }
+                    else
+                    {
+                        Render::RectFilled(
+                            feet.x - width / 2,
+                            head.y,
+                            width,
+                            height,
+                            global.features.teaamcolor,
+                            global.features.teamalpha);
 
-            //3d boxes
-            if (global.features.teamcombo == 2 && global.features.teamenable)
-            {
+                        Render::Rect(
+                            feet.x - width / 2,
+                            head.y,
+                            width,
+                            height,
+                            white,
+                            255,
+                            1.5);
+                    }
+                }
+                else
+                {
+                    Render::RectFilled(
+                        feet.x - width / 2,
+                        head.y,
+                        width,
+                        height,
+                        global.features.teaamcolor,
+                        global.features.teamalpha);
 
+                    Render::Rect(
+                        feet.x - width / 2,
+                        head.y,
+                        width,
+                        height,
+                        white,
+                        255,
+                        1.5);
+                }
             }
 
             //corner 
-            if (global.features.teamcombo == 3 && global.features.teamenable)
+            if (global.features.teamcombo == 2)
             {
-                Render::Line(head.x - width / 2.1, head.y, head.x - width / 5, head.y, global.features.enemycolor, 255, 1.5);
-                Render::Line(feet.x + width / 5, head.y, feet.x + width / 2.1, head.y, global.features.enemycolor, 255, 1.5);
-                Render::Line(head.x - width / 2.1, feet.y + height / 8.9, head.x - width / 5, feet.y + height / 8.9, global.features.enemycolor, 255, 1.5);
-                Render::Line(feet.x + width / 5, feet.y + height / 8.9, feet.x + width / 2.1, feet.y + height / 8.9, global.features.enemycolor, 255, 1.5);
-                Render::Line(head.x - width / 2.1, head.y + height / 10, head.x - width / 2.1, head.y, global.features.enemycolor, 255, 1.5);
-                Render::Line(feet.x + width / 2.1, head.y + height / 10, feet.x + width / 2.1, head.y, global.features.enemycolor, 255, 1.5);
-                Render::Line(head.x - width / 2.1, feet.y - height / 40, head.x - width / 2.1, feet.y + height / 8.9, global.features.enemycolor, 255, 1.5);
-                Render::Line(feet.x + width / 2.1, feet.y - height / 40, feet.x + width / 2.1, feet.y + height / 8.9, global.features.enemycolor, 255, 1.5);
+                if (global.features.teamVisable)
+                {
+                    if (spottedState)
+                    {
+                        Render::Line(head.x - width / 2.1, head.y, head.x - width / 5, head.y, global.features.teamvisablecolor, 255, 1.5);
+                        Render::Line(feet.x + width / 5, head.y, feet.x + width / 2.1, head.y, global.features.teamvisablecolor, 255, 1.5);
+                        Render::Line(head.x - width / 2.1, feet.y + height / 8.9, head.x - width / 5, feet.y + height / 8.9, global.features.teamvisablecolor, 255, 1.5);
+                        Render::Line(feet.x + width / 5, feet.y + height / 8.9, feet.x + width / 2.1, feet.y + height / 8.9, global.features.teamvisablecolor, 255, 1.5);
+                        Render::Line(head.x - width / 2.1, head.y + height / 10, head.x - width / 2.1, head.y, global.features.teamvisablecolor, 255, 1.5);
+                        Render::Line(feet.x + width / 2.1, head.y + height / 10, feet.x + width / 2.1, head.y, global.features.teamvisablecolor, 255, 1.5);
+                        Render::Line(head.x - width / 2.1, feet.y - height / 40, head.x - width / 2.1, feet.y + height / 8.9, global.features.teamvisablecolor, 255, 1.5);
+                        Render::Line(feet.x + width / 2.1, feet.y - height / 40, feet.x + width / 2.1, feet.y + height / 8.9, global.features.teamvisablecolor, 255, 1.5);
+                    }
+                    else
+                    {
+                        Render::Line(head.x - width / 2.1, head.y, head.x - width / 5, head.y, global.features.teaamcolor, 255, 1.5);
+                        Render::Line(feet.x + width / 5, head.y, feet.x + width / 2.1, head.y, global.features.teaamcolor, 255, 1.5);
+                        Render::Line(head.x - width / 2.1, feet.y + height / 8.9, head.x - width / 5, feet.y + height / 8.9, global.features.teaamcolor, 255, 1.5);
+                        Render::Line(feet.x + width / 5, feet.y + height / 8.9, feet.x + width / 2.1, feet.y + height / 8.9, global.features.teaamcolor, 255, 1.5);
+                        Render::Line(head.x - width / 2.1, head.y + height / 10, head.x - width / 2.1, head.y, global.features.teaamcolor, 255, 1.5);
+                        Render::Line(feet.x + width / 2.1, head.y + height / 10, feet.x + width / 2.1, head.y, global.features.teaamcolor, 255, 1.5);
+                        Render::Line(head.x - width / 2.1, feet.y - height / 40, head.x - width / 2.1, feet.y + height / 8.9, global.features.teaamcolor, 255, 1.5);
+                        Render::Line(feet.x + width / 2.1, feet.y - height / 40, feet.x + width / 2.1, feet.y + height / 8.9, global.features.teaamcolor, 255, 1.5);
+                    }
+                }
+                else
+                {
+                    Render::Line(head.x - width / 2.1, head.y, head.x - width / 5, head.y, global.features.teaamcolor, 255, 1.5);
+                    Render::Line(feet.x + width / 5, head.y, feet.x + width / 2.1, head.y, global.features.teaamcolor, 255, 1.5);
+                    Render::Line(head.x - width / 2.1, feet.y + height / 8.9, head.x - width / 5, feet.y + height / 8.9, global.features.teaamcolor, 255, 1.5);
+                    Render::Line(feet.x + width / 5, feet.y + height / 8.9, feet.x + width / 2.1, feet.y + height / 8.9, global.features.teaamcolor, 255, 1.5);
+                    Render::Line(head.x - width / 2.1, head.y + height / 10, head.x - width / 2.1, head.y, global.features.teaamcolor, 255, 1.5);
+                    Render::Line(feet.x + width / 2.1, head.y + height / 10, feet.x + width / 2.1, head.y, global.features.teaamcolor, 255, 1.5);
+                    Render::Line(head.x - width / 2.1, feet.y - height / 40, head.x - width / 2.1, feet.y + height / 8.9, global.features.teaamcolor, 255, 1.5);
+                    Render::Line(feet.x + width / 2.1, feet.y - height / 40, feet.x + width / 2.1, feet.y + height / 8.9, global.features.teaamcolor, 255, 1.5);
+                }
             }
 
             //bone esp
@@ -422,42 +487,110 @@ void CEntityLoop::RenderEsp(view_matrix_t viewMatrix, Vector playerBoneHead, Vec
             //2d box
             if (global.features.enemycombo == 1)
             {
-                Render::RectFilled(
-                    feet.x - width / 2,
-                    head.y,
-                    width,
-                    height,
-                    global.features.enemycolor,
-                    global.features.enemyalpha);
+                if (global.features.enemyVisable)
+                {
+                    if (spottedState)
+                    {
+                        Render::RectFilled(
+                            feet.x - width / 2,
+                            head.y,
+                            width,
+                            height,
+                            global.features.enemyvisablecolor,
+                            global.features.enemyalpha);
 
-                Render::Rect(
-                    feet.x - width / 2,
-                    head.y,
-                    width,
-                    height,
-                    white,
-                    255,
-                    1.5
-                );
-            }
+                        Render::Rect(
+                            feet.x - width / 2,
+                            head.y,
+                            width,
+                            height,
+                            white,
+                            255,
+                            1.5
+                        );
+                    }
+                    else
+                    {
+                        Render::RectFilled(
+                            feet.x - width / 2,
+                            head.y,
+                            width,
+                            height,
+                            global.features.enemycolor,
+                            global.features.enemyalpha);
 
-            //3d boxes
-            if (global.features.enemycombo == 2 && global.features.enemyenable)
-            {
+                        Render::Rect(
+                            feet.x - width / 2,
+                            head.y,
+                            width,
+                            height,
+                            white,
+                            255,
+                            1.5
+                        );
+                    }
+                }
+                else
+                {
+                    Render::RectFilled(
+                        feet.x - width / 2,
+                        head.y,
+                        width,
+                        height,
+                        global.features.enemycolor,
+                        global.features.enemyalpha);
 
+                    Render::Rect(
+                        feet.x - width / 2,
+                        head.y,
+                        width,
+                        height,
+                        white,
+                        255,
+                        1.5
+                    );
+                }
             }
 
             //corner 
-            if (global.features.enemycombo == 3 && global.features.enemyenable)
+            if (global.features.enemycombo == 2)
             {
-                Render::Line(head.x - width / 2.1, head.y, head.x - width / 5, head.y, global.features.enemycolor, 255, 1.5);
-                Render::Line(feet.x + width / 5, head.y, feet.x + width / 2.1, head.y, global.features.enemycolor, 255, 1.5);
-                Render::Line(head.x - width / 2.1, feet.y + height / 8.9, head.x - width / 5, feet.y + height / 8.9, global.features.enemycolor, 255, 1.5);
-                Render::Line(feet.x + width / 5, feet.y + height / 8.9, feet.x + width / 2.1, feet.y + height / 8.9, global.features.enemycolor, 255, 1.5);
-                Render::Line(head.x - width / 2.1, head.y + height / 10, head.x - width / 2.1, head.y, global.features.enemycolor, 255, 1.5);
-                Render::Line(feet.x + width / 2.1, head.y + height / 10, feet.x + width / 2.1, head.y, global.features.enemycolor, 255, 1.5);
-                Render::Line(head.x - width / 2.1, feet.y - height / 40, head.x - width / 2.1, feet.y + height / 8.9, global.features.enemycolor, 255, 1.5);
-                Render::Line(feet.x + width / 2.1, feet.y - height / 40, feet.x + width / 2.1, feet.y + height / 8.9, global.features.enemycolor, 255, 1.5);
+                if (global.features.enemyVisable)
+                {
+                    if (spottedState)
+                    {
+                        Render::Line(head.x - width / 2.1, head.y, head.x - width / 5, head.y, global.features.enemyvisablecolor, 255, 1.5);
+                        Render::Line(feet.x + width / 5, head.y, feet.x + width / 2.1, head.y, global.features.enemyvisablecolor, 255, 1.5);
+                        Render::Line(head.x - width / 2.1, feet.y + height / 8.9, head.x - width / 5, feet.y + height / 8.9, global.features.enemyvisablecolor, 255, 1.5);
+                        Render::Line(feet.x + width / 5, feet.y + height / 8.9, feet.x + width / 2.1, feet.y + height / 8.9, global.features.enemyvisablecolor, 255, 1.5);
+                        Render::Line(head.x - width / 2.1, head.y + height / 10, head.x - width / 2.1, head.y, global.features.enemyvisablecolor, 255, 1.5);
+                        Render::Line(feet.x + width / 2.1, head.y + height / 10, feet.x + width / 2.1, head.y, global.features.enemyvisablecolor, 255, 1.5);
+                        Render::Line(head.x - width / 2.1, feet.y - height / 40, head.x - width / 2.1, feet.y + height / 8.9, global.features.enemyvisablecolor, 255, 1.5);
+                        Render::Line(feet.x + width / 2.1, feet.y - height / 40, feet.x + width / 2.1, feet.y + height / 8.9, global.features.enemyvisablecolor, 255, 1.5);
+                    }
+                    else
+                    {
+                        Render::Line(head.x - width / 2.1, head.y, head.x - width / 5, head.y, global.features.enemycolor, 255, 1.5);
+                        Render::Line(feet.x + width / 5, head.y, feet.x + width / 2.1, head.y, global.features.enemycolor, 255, 1.5);
+                        Render::Line(head.x - width / 2.1, feet.y + height / 8.9, head.x - width / 5, feet.y + height / 8.9, global.features.enemycolor, 255, 1.5);
+                        Render::Line(feet.x + width / 5, feet.y + height / 8.9, feet.x + width / 2.1, feet.y + height / 8.9, global.features.enemycolor, 255, 1.5);
+                        Render::Line(head.x - width / 2.1, head.y + height / 10, head.x - width / 2.1, head.y, global.features.enemycolor, 255, 1.5);
+                        Render::Line(feet.x + width / 2.1, head.y + height / 10, feet.x + width / 2.1, head.y, global.features.enemycolor, 255, 1.5);
+                        Render::Line(head.x - width / 2.1, feet.y - height / 40, head.x - width / 2.1, feet.y + height / 8.9, global.features.enemycolor, 255, 1.5);
+                        Render::Line(feet.x + width / 2.1, feet.y - height / 40, feet.x + width / 2.1, feet.y + height / 8.9, global.features.enemycolor, 255, 1.5);
+                    }
+                }
+                else
+                {
+                    Render::Line(head.x - width / 2.1, head.y, head.x - width / 5, head.y, global.features.enemycolor, 255, 1.5);
+                    Render::Line(feet.x + width / 5, head.y, feet.x + width / 2.1, head.y, global.features.enemycolor, 255, 1.5);
+                    Render::Line(head.x - width / 2.1, feet.y + height / 8.9, head.x - width / 5, feet.y + height / 8.9, global.features.enemycolor, 255, 1.5);
+                    Render::Line(feet.x + width / 5, feet.y + height / 8.9, feet.x + width / 2.1, feet.y + height / 8.9, global.features.enemycolor, 255, 1.5);
+                    Render::Line(head.x - width / 2.1, head.y + height / 10, head.x - width / 2.1, head.y, global.features.enemycolor, 255, 1.5);
+                    Render::Line(feet.x + width / 2.1, head.y + height / 10, feet.x + width / 2.1, head.y, global.features.enemycolor, 255, 1.5);
+                    Render::Line(head.x - width / 2.1, feet.y - height / 40, head.x - width / 2.1, feet.y + height / 8.9, global.features.enemycolor, 255, 1.5);
+                    Render::Line(feet.x + width / 2.1, feet.y - height / 40, feet.x + width / 2.1, feet.y + height / 8.9, global.features.enemycolor, 255, 1.5);
+                }
             }
 
             //bone esp

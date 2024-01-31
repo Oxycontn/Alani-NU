@@ -275,6 +275,9 @@ void Overlay::DestroyDevice()
 
 void Overlay::DestroyImGui()
 {
+    ImFontAtlas font;
+    font.ClearFonts();
+
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
 
@@ -548,6 +551,7 @@ void Menu::ConfigMenu()
             fs << global.features.teamenable << std::endl;
             fs << global.features.teamcombo << std::endl;
             fs << global.features.teamalpha << std::endl;
+            fs << global.features.teamVisable << std::endl;
             //bone
             fs << global.features.teamskel << std::endl;
             fs << global.features.teamJoint << std::endl;
@@ -568,6 +572,7 @@ void Menu::ConfigMenu()
             fs << global.features.enemyenable << std::endl;
             fs << global.features.enemycombo << std::endl;
             fs << global.features.enemyalpha << std::endl;
+            fs << global.features.enemyVisable << std::endl;
             //bone
             fs << global.features.enemyskel << std::endl;
             fs << global.features.enemyJoint << std::endl;
@@ -594,6 +599,7 @@ void Menu::ConfigMenu()
             fs << global.features.grenade << std::endl;
             fs << global.features.decoy << std::endl;
             fs << global.features.c4 << std::endl;
+            fs << global.features.worldenable << std::endl;
 
             //aimbot
 
@@ -607,6 +613,7 @@ void Menu::ConfigMenu()
             fs << global.features.ARaimbotsmooth << std::endl;
             fs << global.features.ARaimbotfovcircle << std::endl;
             fs << global.features.ARaimbotdistance << std::endl;
+            fs << global.features.ARautosleep << std::endl;
 
             //Shotguns
             fs << global.features.SGaimbotenable << std::endl;
@@ -618,6 +625,7 @@ void Menu::ConfigMenu()
             fs << global.features.SGaimbotsmooth << std::endl;
             fs << global.features.SGaimbotfovcircle << std::endl;
             fs << global.features.SGaimbotdistance << std::endl;
+            fs << global.features.SGautosleep << std::endl;
 
             //Pistols
             fs << global.features.PSaimbotenable << std::endl;
@@ -629,6 +637,7 @@ void Menu::ConfigMenu()
             fs << global.features.PSaimbotsmooth << std::endl;
             fs << global.features.PSaimbotfovcircle << std::endl;
             fs << global.features.PSaimbotdistance << std::endl;
+            fs << global.features.PSautosleep << std::endl;
 
             //Snipers
             fs << global.features.SRaimbotenable << std::endl;
@@ -640,6 +649,7 @@ void Menu::ConfigMenu()
             fs << global.features.SRaimbotsmooth << std::endl;
             fs << global.features.SRaimbotfovcircle << std::endl;
             fs << global.features.SRaimbotdistance << std::endl;
+            fs << global.features.SRautosleep << std::endl;
 
             //SMG
             fs << global.features.SMGaimbotenable << std::endl;
@@ -651,6 +661,7 @@ void Menu::ConfigMenu()
             fs << global.features.SMGaimbotsmooth << std::endl;
             fs << global.features.SMGaimbotfovcircle << std::endl;
             fs << global.features.SMGaimbotdistance << std::endl;
+            fs << global.features.SMGautosleep << std::endl;
 
             //rcs
             fs << global.features.rcsenable << std::endl;
@@ -674,6 +685,7 @@ void Menu::ConfigMenu()
                 fs >> global.features.teamenable;
                 fs >> global.features.teamcombo;
                 fs >> global.features.teamalpha;
+                fs >> global.features.teamVisable;
                 //bone
                 fs >> global.features.teamskel;
                 fs >> global.features.teamJoint;
@@ -694,6 +706,7 @@ void Menu::ConfigMenu()
                 fs >> global.features.enemyenable;
                 fs >> global.features.enemycombo;
                 fs >> global.features.enemyalpha;
+                fs >> global.features.enemyVisable;
                 //bone
                 fs >> global.features.enemyskel;
                 fs >> global.features.enemyJoint;
@@ -720,6 +733,7 @@ void Menu::ConfigMenu()
                 fs >> global.features.grenade;
                 fs >> global.features.decoy;
                 fs >> global.features.c4;
+                fs >> global.features.worldenable;
 
                 //aimbot
 
@@ -733,6 +747,7 @@ void Menu::ConfigMenu()
                 fs >> global.features.ARaimbotsmooth;
                 fs >> global.features.ARaimbotfovcircle;
                 fs >> global.features.ARaimbotdistance;
+                fs >> global.features.ARautosleep;
 
                 //Shotguns
                 fs >> global.features.SGaimbotenable;
@@ -744,6 +759,7 @@ void Menu::ConfigMenu()
                 fs >> global.features.SGaimbotsmooth;
                 fs >> global.features.SGaimbotfovcircle;
                 fs >> global.features.SGaimbotdistance;
+                fs >> global.features.SGautosleep;
 
                 //Pistols
                 fs >> global.features.PSaimbotenable;
@@ -755,6 +771,7 @@ void Menu::ConfigMenu()
                 fs >> global.features.PSaimbotsmooth;
                 fs >> global.features.PSaimbotfovcircle;
                 fs >> global.features.PSaimbotdistance;
+                fs >> global.features.PSautosleep;
 
                 //Snipers
                 fs >> global.features.SRaimbotenable;
@@ -766,6 +783,7 @@ void Menu::ConfigMenu()
                 fs >> global.features.SRaimbotsmooth;
                 fs >> global.features.SRaimbotfovcircle;
                 fs >> global.features.SRaimbotdistance;
+                fs >> global.features.SRautosleep;
 
                 //SMG
                 fs >> global.features.SMGaimbotenable;
@@ -777,6 +795,7 @@ void Menu::ConfigMenu()
                 fs >> global.features.SMGaimbotsmooth;
                 fs >> global.features.SMGaimbotfovcircle;
                 fs >> global.features.SMGaimbotdistance;
+                fs >> global.features.SMGautosleep;
 
                 //rcs
                 fs >> global.features.rcsenable;
@@ -798,7 +817,7 @@ void Menu::ConfigMenu()
 void Menu::EspMenu()
 {
     ImGui::SetNextWindowPos({ 220, 0 });
-    ImGui::SetNextWindowSize({ 240, 675 });
+    ImGui::SetNextWindowSize({ 240, 700 });
 
     ImGui::Begin("espmenu", NULL, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoTitleBar);
 
@@ -808,7 +827,7 @@ void Menu::EspMenu()
     {
         TextCentered("Visuals");
 
-        if (ImGui::BeginChild("##settings", ImVec2(205, 600), true, ImGuiWindowFlags_NoScrollbar))
+        if (ImGui::BeginChild("##settings", ImVec2(205, 625), true, ImGuiWindowFlags_NoScrollbar))
         {
             if (ImGui::BeginTabBar("##settings", NULL))
             {
@@ -818,15 +837,18 @@ void Menu::EspMenu()
 
                     ImGui::NewLine();
                     TextCentered("Frame");
-                    if (ImGui::BeginChild("##teamframe", ImVec2(190, 90), true, ImGuiWindowFlags_NoScrollbar))
+                    if (ImGui::BeginChild("##teamframe", ImVec2(190, 120), true, ImGuiWindowFlags_NoScrollbar))
                     {
                         ImGui::Checkbox("enable", &global.features.teamenable);
                         ImGui::SameLine();
                         ImGui::ColorEdit3("##teamframecolor", (float*)&global.features.teaamcolor, ImGuiColorEditFlags_NoInputs);
-                        ImGui::Combo("style", &global.features.teamcombo, global.features.comboSelections, 4);
+                        ImGui::Combo("style", &global.features.teamcombo, global.features.comboSelections, 3);
+                        ImGui::Checkbox("visable", &global.features.teamVisable);
+                        ImGui::SameLine();
+                        ImGui::ColorEdit3("##teamvisablecolor", (float*)&global.features.teamvisablecolor, ImGuiColorEditFlags_NoInputs);
                         if(global.features.teamcombo == 1)
                             ImGui::SliderFloat("alpha", &global.features.teamalpha, 0, 100);
-                        else if(global.features.teamcombo == 3)
+                        else if(global.features.teamcombo == 2)
                             ImGui::SliderFloat("alpha", &global.features.teamalpha, 0, 255);
                     }
                     ImGui::EndChild();
@@ -903,15 +925,18 @@ void Menu::EspMenu()
 
                     ImGui::NewLine();
                     TextCentered("Frame");
-                    if (ImGui::BeginChild("##enemyframe", ImVec2(190, 90), true, ImGuiWindowFlags_NoScrollbar))
+                    if (ImGui::BeginChild("##enemyframe", ImVec2(190, 120), true, ImGuiWindowFlags_NoScrollbar))
                     {
                         ImGui::Checkbox("enable", &global.features.enemyenable);
                         ImGui::SameLine();
                         ImGui::ColorEdit3("##enemyframecolor", (float*)&global.features.enemycolor, ImGuiColorEditFlags_NoInputs);
-                        ImGui::Combo("style", &global.features.enemycombo, global.features.comboSelections, 4);
+                        ImGui::Combo("style", &global.features.enemycombo, global.features.comboSelections, 3);
+                        ImGui::Checkbox("visable", &global.features.enemyVisable);
+                        ImGui::SameLine();
+                        ImGui::ColorEdit3("##enemyvisablecolor", (float*)&global.features.enemyvisablecolor, ImGuiColorEditFlags_NoInputs);
                         if (global.features.enemycombo == 1)
                             ImGui::SliderFloat("alpha", &global.features.enemyalpha, 0, 100);
-                        else if (global.features.enemycombo == 3)
+                        else if (global.features.enemycombo == 2)
                             ImGui::SliderFloat("alpha", &global.features.enemyalpha, 0, 255);
                     }
                     ImGui::EndChild();
@@ -987,49 +1012,55 @@ void Menu::EspMenu()
                     ImGui::NewLine();
                     TextCentered("Dropped Entites");
 
-                    ImGui::Checkbox("weapons", &global.features.weapon);
+                    ImGui::Checkbox("enable", &global.features.worldenable);
 
-                    ImGui::Spacing();
-                    ImGui::Spacing();
-                    ImGui::Spacing();
+                    if (ImGui::BeginChild("##dworld", ImVec2(0, 0), true, ImGuiWindowFlags_NoScrollbar))
+                    {
+                        ImGui::Checkbox("weapons", &global.features.weapon);
 
-                    ImGui::Checkbox("molotov", &global.features.molotov);
+                        ImGui::Spacing();
+                        ImGui::Spacing();
+                        ImGui::Spacing();
 
-                    ImGui::Spacing();
-                    ImGui::Spacing();
-                    ImGui::Spacing();
+                        ImGui::Checkbox("molotov", &global.features.molotov);
 
-                    ImGui::Checkbox("inc grende", &global.features.incgrenade);
+                        ImGui::Spacing();
+                        ImGui::Spacing();
+                        ImGui::Spacing();
 
-                    ImGui::Spacing();
-                    ImGui::Spacing();
-                    ImGui::Spacing();
+                        ImGui::Checkbox("inc grende", &global.features.incgrenade);
 
-                    ImGui::Checkbox("smoke", &global.features.smoke);
+                        ImGui::Spacing();
+                        ImGui::Spacing();
+                        ImGui::Spacing();
 
-                    ImGui::Spacing();
-                    ImGui::Spacing();
-                    ImGui::Spacing();
+                        ImGui::Checkbox("smoke", &global.features.smoke);
 
-                    ImGui::Checkbox("flash", &global.features.flash);
+                        ImGui::Spacing();
+                        ImGui::Spacing();
+                        ImGui::Spacing();
 
-                    ImGui::Spacing();
-                    ImGui::Spacing();
-                    ImGui::Spacing();
+                        ImGui::Checkbox("flash", &global.features.flash);
 
-                    ImGui::Checkbox("grenade", &global.features.grenade);
+                        ImGui::Spacing();
+                        ImGui::Spacing();
+                        ImGui::Spacing();
 
-                    ImGui::Spacing();
-                    ImGui::Spacing();
-                    ImGui::Spacing();
+                        ImGui::Checkbox("grenade", &global.features.grenade);
 
-                    ImGui::Checkbox("decoy", &global.features.decoy);
+                        ImGui::Spacing();
+                        ImGui::Spacing();
+                        ImGui::Spacing();
 
-                    ImGui::Spacing();
-                    ImGui::Spacing();
-                    ImGui::Spacing();
+                        ImGui::Checkbox("decoy", &global.features.decoy);
 
-                    ImGui::Checkbox("c4", &global.features.c4);
+                        ImGui::Spacing();
+                        ImGui::Spacing();
+                        ImGui::Spacing();
+
+                        ImGui::Checkbox("c4", &global.features.c4);
+                    }
+                    ImGui::EndChild();
 
                     ImGui::EndTabItem();
                 }

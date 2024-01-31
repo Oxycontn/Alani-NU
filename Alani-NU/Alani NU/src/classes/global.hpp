@@ -23,7 +23,7 @@ public:
 		bool incgrenade;
 
 		//team bools
-		bool glowTeam;
+		bool teamVisable;
 		bool teamhead;
 		bool teamhealth;
 		bool teamskel;
@@ -36,6 +36,7 @@ public:
 		int teamcombo;
 
 		//team colors and alphas
+		RGB teamvisablecolor = { 0 , 1, 0 };
 		float teamalpha = 60;
 		RGB teaamcolor = { 0, 0, 1 };
 		float teamBoneAlpha = 255;
@@ -46,7 +47,7 @@ public:
 		RGB teamHeaadColor = { 1,1,1 };
 
 		//enemy bools
-		bool glowEnemy;
+		bool enemyVisable;
 		bool enemyhead;
 		bool enemyhealth;
 		bool enemyskel;
@@ -59,6 +60,7 @@ public:
 		int enemycombo;
 
 		//enemy colors and alphas
+		RGB enemyvisablecolor = { 0 , 1, 0 };
 		float enemyalpha = 60;
 		RGB enemycolor = { 1 ,0 , 0 };
 		float enemyBoneAlpha = 255;
@@ -69,7 +71,7 @@ public:
 		RGB enemyHeaadColor = { 1,1,1 };
 
 		// miscallenous
-		const char* comboSelections[4] = { "None", "2D Boxes", "3D Boxes", "Corners" };
+		const char* comboSelections[4] = { "None", "2D Boxes", "Corners" };
 		const char* aimbotBoneSelections[4] = { "Head", "Neck", "Spine", "Crouch" };
 		const char* aimbotKeySelections[4] = { "Mouse Button 2", "LShift", "LCTL", "Left Click" };
 		const char* aimbotGunSelection[5] = { "Assault Rifles", "Shotguns", "Pistols", "Sniper Rifles", "SMGs"};
