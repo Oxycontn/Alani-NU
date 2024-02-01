@@ -7,11 +7,12 @@ CLocal::CLocal(uintptr_t localPlayerPawn)
 	CLocal::localPlayerPawn = localPlayerPawn;
 }
 
-CLocal* CLocal::GetLocalPawn()
+CLocal CLocal::GetLocalPawn()
 {
 	uintptr_t localPlayerPawn = driver.Read<uintptr_t>(global.modules.client + offset::dwLocalPlayerPawn);
+	global.misc.localPlayerPawn = localPlayerPawn;
 
-	return new CLocal(localPlayerPawn);
+	return CLocal(localPlayerPawn);
 }
 
 uintptr_t CLocal::GetLocalController()
@@ -104,7 +105,7 @@ Vector2 CLocal::EyePosition() const noexcept
 
 int CLocal::GetWeaponGroup(std::string weaponName)
 {
-	int weaponGroup;
+	int weaponGroup{};
 
 	//ar
 	if (weaponName == "weapon_ak47" || weaponName == "weapon_aug" || weaponName == "weapon_famas" || weaponName == "weapon_galilar" || weaponName == "weapon_m4a1_silencer" || weaponName == "weapon_m4a1" || weaponName == "weapon_sg553")

@@ -14,7 +14,8 @@ class CLocal
 public:
 	CLocal(uintptr_t localPlayerPawn);
 
-	static CLocal* GetLocalPawn();
+	static CLocal GetLocalPawn();
+
 	static uintptr_t GetLocalController();
 	static view_matrix_t GetViewMatrix();
 	static Vector2 AimPunchAngle(aimPunchCache AimPunch);
@@ -33,6 +34,5 @@ public:
 	Vector2 EyePosition() const noexcept;
 
 private:
-	uintptr_t localPlayerPawn;
-	uintptr_t localPlayerController;
+	uintptr_t localPlayerPawn{};
 };

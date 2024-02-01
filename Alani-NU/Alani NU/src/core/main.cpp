@@ -1,5 +1,7 @@
 #pragma warning( disable : 4244 4312 4305 4005 4477 )
 
+#include "crtdbg.h"
+
 #include <Windows.h>
 #include <iostream> // debug
 #include <thread> // threading
@@ -22,40 +24,6 @@
 //disableing DSE
 #include "..\dse\disable dse.h"
 
-//for dump
-typedef BOOL(WINAPI* MINIDUMPWRITEDUMP)(HANDLE hProcess, DWORD dwPid, HANDLE hFile, MINIDUMP_TYPE DumpType, CONST PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam, CONST PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam, CONST PMINIDUMP_CALLBACK_INFORMATION CallbackParam);
-
-void CreateMiniDump(struct _EXCEPTION_POINTERS* apExceptionInfo)
-{
-    HMODULE mhLib = ::LoadLibrary(_T("dbghelp.dll"));
-    MINIDUMPWRITEDUMP pDump = (MINIDUMPWRITEDUMP)::GetProcAddress(mhLib, "MiniDumpWriteDump");
-
-    HANDLE  hFile = ::CreateFile(_T("core.dmp"), GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS,
-        FILE_ATTRIBUTE_NORMAL, NULL);
-
-    _MINIDUMP_EXCEPTION_INFORMATION ExInfo;
-    ExInfo.ThreadId = ::GetCurrentThreadId();
-    ExInfo.ExceptionPointers = apExceptionInfo;
-    ExInfo.ClientPointers = FALSE;
-
-    pDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, MiniDumpNormal, &ExInfo, NULL, NULL);
-    ::CloseHandle(hFile);
-}
-
-LONG WINAPI UnhandledHandler(struct _EXCEPTION_POINTERS* apExceptionInfo)
-{
-    printf("[Dump]Program crahsed, unloading Hook Driver\n");
-    dse.UnLoadIOCTLDriver();
-    overlay.DestroyOverlay();
-    overlay.DestroyDevice();
-
-    //then create dump file
-    printf("[Dump]Creating dump file\n");
-    CreateMiniDump(apExceptionInfo);
-
-    return EXCEPTION_CONTINUE_SEARCH;
-}
-
 //for CtrlHandler
 BOOL WINAPI CtrlHandler(DWORD fdwCtrlType)
 {
@@ -66,7 +34,6 @@ BOOL WINAPI CtrlHandler(DWORD fdwCtrlType)
         dse.UnLoadIOCTLDriver();
         overlay.DestroyOverlay();
         overlay.DestroyDevice();
-        system("pause");
         return TRUE;
         break;
 
@@ -87,9 +54,6 @@ void StartThreads()
 
 int main()
 {
-    //dump handler
-    SetUnhandledExceptionFilter(UnhandledHandler);
-
     //control handler
     SetConsoleCtrlHandler(CtrlHandler, TRUE);
 
@@ -132,6 +96,7 @@ int main()
         results = dse.LoadIOCTLDriver();
         if (!results)
         {
+            dse.UnLoadIOCTLDriver();
             dse.EnableDSE(g_CiOptionAddress, ghDriver);
             goto GoToPause;
         }
@@ -185,6 +150,7 @@ int main()
     while(true)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
         if (FindWindowW(NULL, L"Counter-Strike 2") == NULL)
             break;
         else
@@ -201,8 +167,7 @@ int main()
     overlay.DestroyOverlay();
     overlay.DestroyDevice();
 
-    system("pause");
-	return 0;
+    return 0;
 
 GoToPause:
     system("pause");

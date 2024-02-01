@@ -27,20 +27,19 @@ void CAimbot::AimbotLoop()
 	//local player varibles
 	auto localPlayerPawn = CLocal::GetLocalPawn();
 	view_matrix_t viewMatrix = CLocal::GetViewMatrix();
+	uintptr_t localPlayerController = CLocal::GetLocalController();
 
-	std::string weaponName = localPlayerPawn->GetWeaponNameLocal();
+	std::string weaponName = localPlayerPawn.GetWeaponNameLocal();
 	int weaponGroup = CLocal::GetWeaponGroup(weaponName);
 
-	Vector localPos = localPlayerPawn->Position();
+	Vector localPos = localPlayerPawn.Position();
+	int localTeam = localPlayerPawn.Team();
 
-	Vector2 viewAngle = localPlayerPawn->ViewAngle();
-	bool ammo = localPlayerPawn->Ammo();
+	Vector2 viewAngle = localPlayerPawn.ViewAngle();
+	bool ammo = localPlayerPawn.Ammo();
 
-	int shotsFired = localPlayerPawn->ShotsFired();
-	auto fFlags = localPlayerPawn->Flags();
-
-	int localTeam = localPlayerPawn->Team();
-	uintptr_t localPlayerController = CLocal::GetLocalController();
+	int shotsFired = localPlayerPawn.ShotsFired();
+	auto fFlags = localPlayerPawn.Flags();
 
 	bool aimbotEnable = AimbotEnable(weaponGroup);
 
@@ -53,24 +52,23 @@ void CAimbot::AimbotLoop()
 
 			//entity varibles
 			auto playerController = CEntity::GetPlayerController(entityList, localPlayerController, i);
-			auto pc = CEntity::PlayerController(playerController);
 
-			auto pCSPlayerPawn = CEntity::GetpCSPlayerPawn(entityList, playerController, i);
+			auto pCSPlayerPawn = CEntity::GetpCSPlayerPawn(entityList, playerController, i, global.misc.localPlayerPawn);
 
-			int health = pCSPlayerPawn->Health();
+			int health = pCSPlayerPawn.Health();
 
 			if (health <= 0 || health > 100)
 				continue;
 
-			int playerTeam = pCSPlayerPawn->Team();
+			int playerTeam = pCSPlayerPawn.Team();
 
 			if (playerTeam == localTeam)
 				continue;
 
-			bool spottedState = pCSPlayerPawn->spottedState();
+			bool spottedState = pCSPlayerPawn.spottedState();
 
-			uintptr_t bonearray = pCSPlayerPawn->Bonearray();
-			Vector playerPos = pCSPlayerPawn->Feet();
+			uintptr_t bonearray = pCSPlayerPawn.Bonearray();
+			Vector playerPos = pCSPlayerPawn.Feet();
 
 			//settings
 			float aimbotFov = AimbotFov(weaponGroup);
@@ -111,7 +109,7 @@ void CAimbot::AimbotLoop()
 						{
 							if (shotsFired != 0)
 							{
-								aimPunchCache aimpunchCache = localPlayerPawn->AimPunch();
+								aimPunchCache aimpunchCache = localPlayerPawn.AimPunch();
 
 								Vector2 aimPunch = CLocal::AimPunchAngle(aimpunchCache);
 
@@ -297,14 +295,14 @@ int CAimbot::AimbotKey(int weaponGroup)
 	return vKey;
 }
 
-Vector CAimbot::AimbotBone(int weaponGroup, CEntity* pCSPlayerPawn)
+Vector CAimbot::AimbotBone(int weaponGroup, CEntity pCSPlayerPawn)
 {
 	Vector bone{};
 
-	Vector boneHead = pCSPlayerPawn->Bone(bones::head);
-	Vector boneNeck = pCSPlayerPawn->Bone(bones::neck);
-	Vector boneSpine = pCSPlayerPawn->Bone(bones::spine);
-	Vector boneCock = pCSPlayerPawn->Bone(bones::cock);
+	Vector boneHead = pCSPlayerPawn.Bone(bones::head);
+	Vector boneNeck = pCSPlayerPawn.Bone(bones::neck);
+	Vector boneSpine = pCSPlayerPawn.Bone(bones::spine);
+	Vector boneCock = pCSPlayerPawn.Bone(bones::cock);
 
 	switch (weaponGroup)
 	{

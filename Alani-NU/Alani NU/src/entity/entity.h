@@ -9,8 +9,7 @@ public:
 
 	static uintptr_t GetEntityList();
 	static uintptr_t GetPlayerController(uintptr_t entityList, uintptr_t localPlayer, int i);
-	static CEntity* GetpCSPlayerPawn(uintptr_t entityList, uintptr_t playerController, int i);
-	static CEntity* PlayerController(uintptr_t playerController);
+	static CEntity GetpCSPlayerPawn(uintptr_t entityList, uintptr_t playerController, int i, uintptr_t localPlayerPawn);
 
 	int Health() const noexcept;
 	int Team() const noexcept;
@@ -33,5 +32,5 @@ public:
 	static std::string GetPlayerName(uintptr_t playerController);
 
 private:
-	uintptr_t entityAddress;
+	uintptr_t entityAddress{};
 };

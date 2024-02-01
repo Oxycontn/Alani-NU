@@ -73,8 +73,9 @@ public:
 		// miscallenous
 		const char* comboSelections[4] = { "None", "2D Boxes", "Corners" };
 		const char* aimbotBoneSelections[4] = { "Head", "Neck", "Spine", "Crouch" };
-		const char* aimbotKeySelections[4] = { "Mouse Button 2", "LShift", "LCTL", "Left Click" };
+		const char* aimbotKeySelections[4] = { "Mouse Button 2", "LShift", "LCTL", "LClick" };
 		const char* aimbotGunSelection[5] = { "Assault Rifles", "Shotguns", "Pistols", "Sniper Rifles", "SMGs"};
+		const char* bhopKeySelections[4] = { "Spacebar", "Mouse Button 2", "LCTL", "LShift" };
 
 		//aimbot
 		int aimbotGunCombo;
@@ -143,6 +144,10 @@ public:
 		bool rcsenable;
 		float rcsscaleX;
 		float rcsscaleY;
+
+		//misc
+		bool bHop;
+		int bHopkeycombo;
 	};
 
 	struct modules_t
@@ -151,15 +156,15 @@ public:
 		uintptr_t engine;
 	};
 
-	struct threads_t
+	struct misc_t
 	{
-		bool stopEsp = false;
-		bool stopAimbot = false;
+		uintptr_t localPlayerPawn;
+		int localPlayerPawnIndex;
 	};
 
 	features_t features;
 	modules_t modules;
-	threads_t threads;
+	misc_t misc;
 };
 inline CGlobals global;
 

@@ -14,7 +14,7 @@ public:
 	void AimbotLoop();
 
 	int AimbotKey(int weaponGroup);
-	Vector AimbotBone(int weaponGroup, CEntity* pCSPlayerPawn);
+	Vector AimbotBone(int weaponGroup, CEntity pCSPlayerPawn);
 	bool AimbotEnable(int weaponGroup);
 	float AimbotFov(int weaponGroup);
 	bool AimbotVisable(int weaponGroup);

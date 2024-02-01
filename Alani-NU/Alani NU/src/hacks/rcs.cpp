@@ -12,18 +12,18 @@ void CRCS::RcsLoop()
 	if (global.features.rcsenable)
 	{
 		auto localPlayerPawn = CLocal::GetLocalPawn();
-		int shotsFired = localPlayerPawn->ShotsFired();
+		int shotsFired = localPlayerPawn.ShotsFired();
 
-		std::string weaponName = localPlayerPawn->GetWeaponNameLocal();
+		std::string weaponName = localPlayerPawn.GetWeaponNameLocal();
 		int weaponGroup = CLocal::GetWeaponGroup(weaponName);
 
 		if (!aimbot.aimbotRCS && weaponGroup == 1 || weaponGroup == 5)
 		{
 			if (shotsFired != 0 && GetAsyncKeyState(VK_LBUTTON))
 			{
-				Vector2 viewAngles = localPlayerPawn->ViewAngle();
+				Vector2 viewAngles = localPlayerPawn.ViewAngle();
 
-				aimPunchCache aimpunchCache = localPlayerPawn->AimPunch();
+				aimPunchCache aimpunchCache = localPlayerPawn.AimPunch();
 
 				Vector2 aimPunch = CLocal::AimPunchAngle(aimpunchCache);
 

@@ -33,12 +33,7 @@ uintptr_t CEntity::GetPlayerController(uintptr_t entityList, uintptr_t localPlay
 	return pc;
 }
 
-CEntity* CEntity::PlayerController(uintptr_t playerController)
-{
-	return new CEntity(playerController);
-}
-
-CEntity* CEntity::GetpCSPlayerPawn(uintptr_t entityList, uintptr_t playerController, int i)
+CEntity CEntity::GetpCSPlayerPawn(uintptr_t entityList, uintptr_t playerController, int i, uintptr_t localPlayerPawn)
 {
 	auto playerPawn = driver.Read<uintptr_t>(playerController + offset::Pawn);
 
@@ -46,7 +41,10 @@ CEntity* CEntity::GetpCSPlayerPawn(uintptr_t entityList, uintptr_t playerControl
 
 	auto pCSPlayerPawn = driver.Read<uintptr_t>(list2 + 120 * (playerPawn & 0x1FF));
 
-	return new CEntity(pCSPlayerPawn);
+	if (pCSPlayerPawn == localPlayerPawn)
+		global.misc.localPlayerPawnIndex = i;
+
+	return CEntity(pCSPlayerPawn);
 }
 
 int CEntity::Health() const noexcept
@@ -66,7 +64,9 @@ int CEntity::Armor() const noexcept
 
 bool CEntity::spottedState() const noexcept
 {
-	return driver.Read<bool>(entityAddress + offset::m_entitySpottedState + 0x08);
+	uintptr_t spottedState = driver.Read<uintptr_t>(entityAddress + offset::m_entitySpottedState + 0x08);
+
+	return spottedState & (1 << global.misc.localPlayerPawnIndex - 1);
 }
 
 uintptr_t CEntity::Gamescene() const noexcept

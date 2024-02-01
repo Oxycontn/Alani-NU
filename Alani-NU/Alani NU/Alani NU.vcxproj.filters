@@ -125,12 +125,6 @@
     <ClInclude Include="src\hacks\aimbot.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ext\Font\fonticons.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ext\Font\fonticonsdata.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\hacks\rcs.h">
       <Filter>Header Files</Filter>
     </ClInclude>

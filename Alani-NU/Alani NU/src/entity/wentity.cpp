@@ -6,9 +6,9 @@ CWEntity::CWEntity(uintptr_t entityController)
 	CWEntity::entityController = entityController;
 }
 
-CWEntity* CWEntity::EntityController(uintptr_t entityController)
+CWEntity CWEntity::EntityController(uintptr_t entityController)
 {
-	return new CWEntity(entityController);
+	return CWEntity(entityController);
 }
 
 int CWEntity::EntityOwner() const noexcept

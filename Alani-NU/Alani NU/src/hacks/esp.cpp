@@ -35,7 +35,6 @@ void CEntityLoop::EspThread()
         {
             SetWindowLong(overlay.overlay, GWL_EXSTYLE, WS_EX_TOOLWINDOW | WS_EX_TRANSPARENT | WS_EX_TOPMOST);
             menu.NewMenu();
-            overlay.EndRender();
         }
         else
             SetWindowLong(overlay.overlay, GWL_EXSTYLE, WS_EX_TOOLWINDOW | WS_EX_TRANSPARENT | WS_EX_LAYERED | WS_EX_TOPMOST);
@@ -51,57 +50,55 @@ void CEntityLoop::EspLoop()
 {
     //entity list varibles
     uintptr_t entityList = CEntity::GetEntityList();
-    int entMax = driver.Read<int>(entityList + offset::dwGameEntitySystem_getHighestEntityIndex);
 
     //local player varibles
     auto localPlayerPawn = CLocal::GetLocalPawn();
     view_matrix_t viewMatrix = CLocal::GetViewMatrix();
     uintptr_t localPlayerController = CLocal::GetLocalController();
 
-    int localTeam = localPlayerPawn->Team();
-    int localHealth = localPlayerPawn->Health();
-    Vector localPosition = localPlayerPawn->Position();
-    std::string localWeaponName = localPlayerPawn->GetWeaponNameLocal();
+    int localTeam = localPlayerPawn.Team();
+    int localHealth = localPlayerPawn.Health();
+    Vector localPosition = localPlayerPawn.Position();
+    std::string localWeaponName = localPlayerPawn.GetWeaponNameLocal();
 
-    for (int i = 1; i < entMax; ++i)
+    for (int i = 1; i < 1024; ++i)
     {
         if (overlay.RenderMenu)
             continue;
 
         uintptr_t playerController = CEntity::GetPlayerController(entityList, localPlayerController, i);
-        auto pc = CEntity::PlayerController(playerController);
 
         //plyer entities
         if (i <= 64)
         {
             if (global.features.teamenable || global.features.enemyenable)
             {
-                auto pCSPlayerPawn = CEntity::GetpCSPlayerPawn(entityList, playerController, i);
+                auto pCSPlayerPawn = CEntity::GetpCSPlayerPawn(entityList, playerController, i, global.misc.localPlayerPawn);
 
-                int playerHealth = pCSPlayerPawn->Health();
-                int playerTeam = pCSPlayerPawn->Team();
-                int playerArmor = pCSPlayerPawn->Armor();
+                int playerHealth = pCSPlayerPawn.Health();
+                int playerTeam = pCSPlayerPawn.Team();
+                int playerArmor = pCSPlayerPawn.Armor();
 
                 if (playerHealth <= 0 || playerHealth > 100)
                     continue;
 
-                uintptr_t gamescene = pCSPlayerPawn->Gamescene();
-                uintptr_t bonearray = pCSPlayerPawn->Bonearray();
+                uintptr_t gamescene = pCSPlayerPawn.Gamescene();
+                uintptr_t bonearray = pCSPlayerPawn.Bonearray();
 
-                Vector readFeet = pCSPlayerPawn->Feet();
-                Vector readBoneHead = pCSPlayerPawn->Bone(bones::head);
+                Vector readFeet = pCSPlayerPawn.Feet();
+                Vector readBoneHead = pCSPlayerPawn.Bone(bones::head);
 
-                bool spottedState = pCSPlayerPawn->spottedState();
+                bool spottedState = pCSPlayerPawn.spottedState();
 
                 // made a wrapper for everything below but it was bugging out, not sure why. we'll keep this here for now i guess.
-                Vector head;
+                Vector head {};
 
                 head.x = readFeet.x;
                 head.y = readFeet.y;
                 head.z = readFeet.z + 75.f;
 
                 std::string playerName = CEntity::GetPlayerName(playerController);
-                std::string weaponName = pCSPlayerPawn->GetWeaponName();
+                std::string weaponName = pCSPlayerPawn.GetWeaponName();
 
                 RenderEsp(viewMatrix, readBoneHead, readFeet, head, localPosition, weaponName, localTeam, playerTeam, playerName, playerArmor, playerHealth, pCSPlayerPawn, spottedState);
             }
@@ -114,11 +111,11 @@ void CEntityLoop::EspLoop()
             {
                 auto entityController = CWEntity::EntityController(playerController);
 
-                auto entityOwner = entityController->EntityOwner();
+                auto entityOwner = entityController.EntityOwner();
                 if (entityOwner != -1)
                     continue;
 
-                auto pEntity = entityController->PEntity();
+                auto pEntity = entityController.PEntity();
 
                 auto designerNameptr = CWEntity::DesignerNamePtr(pEntity);
 
@@ -127,19 +124,20 @@ void CEntityLoop::EspLoop()
                 if (designerName.find("weapon"))
                     continue;
 
-                auto gameScene = entityController->Gamescene();
+                auto gameScene = entityController.Gamescene();
 
                 Vector entityOrigin = CWEntity::EntityPosition(gameScene);
 
                 RenderWorld(localPosition, entityOrigin, viewMatrix, designerName);
             }
         }
-
-        RenderFov(localWeaponName);
     }
+
+    int weaponGroup = CLocal::GetWeaponGroup(localWeaponName);
+    RenderFov(weaponGroup);
 }
 
-void CEntityLoop::Bone(view_matrix_t viewMatrix, int localTeam, int playerTeam, Vector feet, Vector head, CEntity* pCSPlayerPawn)
+void CEntityLoop::Bone(view_matrix_t viewMatrix, int localTeam, int playerTeam, Vector feet, Vector head, CEntity pCSPlayerPawn)
 {
     int circleRadius = abs(feet.y - head.y) / 80;
 
@@ -148,8 +146,8 @@ void CEntityLoop::Bone(view_matrix_t viewMatrix, int localTeam, int playerTeam, 
         int bone1 = boneConnections[i].bone1;
         int bone2 = boneConnections[i].bone2;
 
-        Vector VectorBone1 = pCSPlayerPawn->Bone(bone1);
-        Vector VectorBone2 = pCSPlayerPawn->Bone(bone2);
+        Vector VectorBone1 = pCSPlayerPawn.Bone(bone1);
+        Vector VectorBone2 = pCSPlayerPawn.Bone(bone2);
 
         Vector b1;
         Vector b2;
@@ -258,11 +256,11 @@ void CEntityLoop::RenderWorld(Vector localPos, Vector entityPos, view_matrix_t v
     }
 }
 
-void CEntityLoop::RenderEsp(view_matrix_t viewMatrix, Vector playerBoneHead, Vector playerFeet, Vector playerHead, Vector localPos, std::string weaponName, int localTeam, int playerTeam, std::string playerName, int armorValue, int healthValue, CEntity* pCSPlayerPawn, bool spottedState)
+void CEntityLoop::RenderEsp(view_matrix_t viewMatrix, Vector playerBoneHead, Vector playerFeet, Vector playerHead, Vector localPos, std::string weaponName, int localTeam, int playerTeam, std::string playerName, int armorValue, int healthValue, CEntity pCSPlayerPawn, bool spottedState)
 {
-    Vector feet;
-    Vector head;
-    Vector boneHead;
+    Vector feet{};
+    Vector head{};
+    Vector boneHead{};
 
     if (Vector::WTS(viewMatrix, playerBoneHead, boneHead) &&
         Vector::WTS(viewMatrix, playerFeet, feet) &&
@@ -680,10 +678,8 @@ void CEntityLoop::RenderEsp(view_matrix_t viewMatrix, Vector playerBoneHead, Vec
     }
 }
 
-void CEntityLoop::RenderFov(std::string localWeaponName)
+void CEntityLoop::RenderFov(int weaponGroup)
 {
-    int weaponGroup = CLocal::GetWeaponGroup(localWeaponName);
-
     //AR
     if (weaponGroup == 1)
         if (global.features.ARaimbotfovcircle)

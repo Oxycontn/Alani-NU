@@ -163,8 +163,6 @@
     <ClInclude Include="src\dse\disable dse.h" />
     <ClInclude Include="src\entity\entity.h" />
     <ClInclude Include="ext\Font\font.h" />
-    <ClInclude Include="ext\Font\fonticons.h" />
-    <ClInclude Include="ext\Font\fonticonsdata.h" />
     <ClInclude Include="ext\Images\playerModel.h" />
     <ClInclude Include="ext\Images\logo.h" />
     <ClInclude Include="ext\ImGui\stb_image.h" />

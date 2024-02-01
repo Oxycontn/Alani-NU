@@ -16,8 +16,6 @@
 #include "..\..\ext\Images\playerModel.h"
 #include "..\..\ext\Images\logo.h"
 #include "..\..\ext\Font\font.h"
-#include "..\..\ext\Font\fonticons.h"
-#include "..\..\ext\Font\fonticonsdata.h"
 
 ImU32 Color(RGB color, float alpha)
 {
@@ -215,11 +213,7 @@ void Overlay::StartRender()
 {
     //set up font
     ImGuiIO& io = ImGui::GetIO();
-    static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
-    ImFontConfig icons_config;
-    icons_config.MergeMode = true;
     font = io.Fonts->AddFontFromMemoryTTF(fontData, sizeof(fontData), 14.0f);
-    fontIcons = io.Fonts->AddFontFromMemoryCompressedTTF(FA_compressed_data, FA_compressed_size, 16.0f, &icons_config, icons_ranges);
 
     MSG msg;
     while (PeekMessage(&msg, nullptr, 0U, 0U, PM_REMOVE))
@@ -483,21 +477,21 @@ void Menu::NewMenu()
         ImGui::Spacing();
         ImGui::Spacing();
 
-        if (ImGui::Button(ICON_FA_EYE_LOW_VISION "  Visual", ImVec2(165, 40)))
+        if (ImGui::Button("Visual", ImVec2(165, 40)))
             tab = 1;
 
         ImGui::Spacing();
         ImGui::Spacing();
         ImGui::Spacing();
 
-        if (ImGui::Button(ICON_FA_GUN "  Aimbot", ImVec2(165, 40)))
+        if (ImGui::Button("Aimbot", ImVec2(165, 40)))
             tab = 2;
 
         ImGui::Spacing();
         ImGui::Spacing();
         ImGui::Spacing();
 
-        if (ImGui::Button(ICON_FA_CIRCLE_DOT "  Misc", ImVec2(165, 40)))
+        if (ImGui::Button("Misc", ImVec2(165, 40)))
             tab = 3;
 
         ImGui::Spacing();
@@ -1014,6 +1008,10 @@ void Menu::EspMenu()
 
                     ImGui::Checkbox("enable", &global.features.worldenable);
 
+                    ImGui::Spacing();
+                    ImGui::Spacing();
+                    ImGui::Spacing();
+
                     if (ImGui::BeginChild("##dworld", ImVec2(0, 0), true, ImGuiWindowFlags_NoScrollbar))
                     {
                         ImGui::Checkbox("weapons", &global.features.weapon);
@@ -1382,12 +1380,6 @@ void Menu::AimbotMenu()
                 TextCentered("Assault Riffles");
 
                 ImGui::Checkbox("enable", &global.features.ARaimbotenable);
-                ImGui::SameLine();
-                ButtonCenteredOnLine(ICON_FA_QUESTION "##tooltip1", 2.f);
-                if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-                {
-                    ImGui::SetTooltip("Autoshot : Aimbot will automatically shoot when on the selected bone.\nVisable : Aimbot will only activate on visable players\nFov Circle : When a player is inside the circle, aimbot will target them\nBone : Select what bone to target for aimbot\nHotKey: Select what key to press to activate aimbot\nFOV : Size of the FOV circle\nSmooth : The movement of the aimbot. Higher the value the faster it will move, lower the value slower the slower it will move.\nDistance : Max distance to a player for the aimbot to see them.");
-                }
                 ImGui::Spacing();
                 ImGui::Spacing();
                 ImGui::SliderFloat("smooth", &global.features.ARaimbotsmooth, 0.3, 1.1);
@@ -1415,12 +1407,6 @@ void Menu::AimbotMenu()
                 TextCentered("Shotguns");
 
                 ImGui::Checkbox("enable", &global.features.SGaimbotenable);
-                ImGui::SameLine();
-                ButtonCenteredOnLine(ICON_FA_QUESTION "##tooltip1", 2.f);
-                if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-                {
-                    ImGui::SetTooltip("Autoshot : Aimbot will automatically shoot when on the selected bone.\nVisable : Aimbot will only activate on visable players\nFov Circle : When a player is inside the circle, aimbot will target them\nBone : Select what bone to target for aimbot\nHotKey: Select what key to press to activate aimbot\nFOV : Size of the FOV circle\nSmooth : The movement of the aimbot. Higher the value the faster it will move, lower the value slower the slower it will move.\nDistance : Max distance to a player for the aimbot to see them.");
-                }
                 ImGui::Spacing();
                 ImGui::Spacing();
                 ImGui::SliderFloat("smooth", &global.features.SGaimbotsmooth, 0.3, 1.1);
@@ -1448,12 +1434,6 @@ void Menu::AimbotMenu()
                 TextCentered("Pistols");
 
                 ImGui::Checkbox("enable", &global.features.PSaimbotenable);
-                ImGui::SameLine();
-                ButtonCenteredOnLine(ICON_FA_QUESTION "##tooltip1", 2.f);
-                if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-                {
-                    ImGui::SetTooltip("Autoshot : Aimbot will automatically shoot when on the selected bone.\nVisable : Aimbot will only activate on visable players\nFov Circle : When a player is inside the circle, aimbot will target them\nBone : Select what bone to target for aimbot\nHotKey: Select what key to press to activate aimbot\nFOV : Size of the FOV circle\nSmooth : The movement of the aimbot. Higher the value the faster it will move, lower the value slower the slower it will move.\nDistance : Max distance to a player for the aimbot to see them.");
-                }
                 ImGui::Spacing();
                 ImGui::Spacing();
                 ImGui::SliderFloat("smooth", &global.features.PSaimbotsmooth, 0.3, 1.1);
@@ -1481,12 +1461,6 @@ void Menu::AimbotMenu()
                 TextCentered("Snipers");
 
                 ImGui::Checkbox("enable", &global.features.SRaimbotenable);
-                ImGui::SameLine();
-                ButtonCenteredOnLine(ICON_FA_QUESTION "##tooltip1", 2.f);
-                if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-                {
-                    ImGui::SetTooltip("Autoshot : Aimbot will automatically shoot when on the selected bone.\nVisable : Aimbot will only activate on visable players\nFov Circle : When a player is inside the circle, aimbot will target them\nBone : Select what bone to target for aimbot\nHotKey: Select what key to press to activate aimbot\nFOV : Size of the FOV circle\nSmooth : The movement of the aimbot. Higher the value the faster it will move, lower the value slower the slower it will move.\nDistance : Max distance to a player for the aimbot to see them.");
-                }
                 ImGui::Spacing();
                 ImGui::Spacing();
                 ImGui::SliderFloat("smooth", &global.features.SRaimbotsmooth, 0.3, 1.1);
@@ -1514,12 +1488,6 @@ void Menu::AimbotMenu()
                 TextCentered("SMGs");
 
                 ImGui::Checkbox("enable", &global.features.SMGaimbotenable);
-                ImGui::SameLine();
-                ButtonCenteredOnLine(ICON_FA_QUESTION "##tooltip1", 2.f);
-                if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-                {
-                    ImGui::SetTooltip("Autoshot : Aimbot will automatically shoot when on the selected bone.\nVisable : Aimbot will only activate on visable players\nFov Circle : When a player is inside the circle, aimbot will target them\nBone : Select what bone to target for aimbot\nHotKey: Select what key to press to activate aimbot\nFOV : Size of the FOV circle\nSmooth : The movement of the aimbot. Higher the value the faster it will move, lower the value slower the slower it will move.\nDistance : Max distance to a player for the aimbot to see them.");
-                }
                 ImGui::Spacing();
                 ImGui::Spacing();
                 ImGui::SliderFloat("smooth", &global.features.SMGaimbotsmooth, 0.3, 1.1);
@@ -1553,12 +1521,6 @@ void Menu::AimbotMenu()
         if (ImGui::BeginChild("##rcs", ImVec2(225, 120), true, ImGuiWindowFlags_NoScrollbar))
         {
             ImGui::Checkbox("enable", &global.features.rcsenable);
-            ImGui::SameLine();
-            ButtonCenteredOnLine(ICON_FA_QUESTION "##tooltip1", 2.f);
-            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-            {
-                ImGui::SetTooltip("Scale X : Horizontal efficiency of the RCS\nScale Y: Vertical efficiency of the RCS");
-            }
 
             ImGui::Spacing();
             ImGui::SliderFloat("scale X", &global.features.rcsscaleX, 0, 2);
@@ -1674,5 +1636,17 @@ void Menu::AimbotGraph()
 
 void Menu::MiscMenu()
 {
+    ImGui::SetNextWindowPos({ 220, 0 });
+    ImGui::SetNextWindowSize({ 260, 200 });
 
+    ImGui::Begin("miscmenu", NULL, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoTitleBar);
+
+    if (ImGui::BeginChild("##miscback", ImVec2(0, 0), true, ImGuiWindowFlags_NoScrollbar))
+    {
+        ImGui::NewLine();
+        TextCentered("Under Construction!");
+    }
+    ImGui::EndChild();
+
+    ImGui::End();
 }

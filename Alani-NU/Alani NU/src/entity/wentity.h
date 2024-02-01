@@ -7,7 +7,7 @@ class CWEntity
 public:
 	CWEntity(uintptr_t entityController);
 
-	static CWEntity* EntityController(uintptr_t entityController);
+	static CWEntity EntityController(uintptr_t entityController);
 
 	static uintptr_t DesignerNamePtr(uintptr_t pEntity);
 	static std::string ReadDesignerName(uintptr_t designerNameptr);
@@ -18,5 +18,5 @@ public:
 	uintptr_t Gamescene() const noexcept;
 
 private:
-	uintptr_t entityController;
+	uintptr_t entityController{};
 };
