@@ -4,7 +4,7 @@
 class CRCS
 {
 public:
-	void RcsLoop();
+	void RCS();
 
 	Vector oldAngle, newAngle;
 };

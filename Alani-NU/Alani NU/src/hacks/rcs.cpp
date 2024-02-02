@@ -7,7 +7,7 @@
 #include "..\mem\memory.h"
 #include "..\entity\local.h"
 
-void CRCS::RcsLoop()
+void CRCS::RCS()
 {
 	if (global.features.rcsenable)
 	{

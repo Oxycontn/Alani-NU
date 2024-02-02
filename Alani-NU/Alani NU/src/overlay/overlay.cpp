@@ -477,14 +477,14 @@ void Menu::NewMenu()
         ImGui::Spacing();
         ImGui::Spacing();
 
-        if (ImGui::Button("Visual", ImVec2(165, 40)))
+        if (ImGui::Button("Visuals", ImVec2(165, 40)))
             tab = 1;
 
         ImGui::Spacing();
         ImGui::Spacing();
         ImGui::Spacing();
 
-        if (ImGui::Button("Aimbot", ImVec2(165, 40)))
+        if (ImGui::Button("Aim", ImVec2(165, 40)))
             tab = 2;
 
         ImGui::Spacing();
@@ -657,6 +657,38 @@ void Menu::ConfigMenu()
             fs << global.features.SMGaimbotdistance << std::endl;
             fs << global.features.SMGautosleep << std::endl;
 
+            //triggerbot
+
+            //AR
+            fs << global.features.ARtriggerenable << std::endl;
+            fs << global.features.ARtriggerwait << std::endl;
+            fs << global.features.ARtriggerkey << std::endl;
+            fs << global.features.ARtriggerteam << std::endl;
+
+            //SG
+            fs << global.features.SGtriggerenable << std::endl;
+            fs << global.features.SGtriggerwait << std::endl;
+            fs << global.features.SGtriggerkey << std::endl;
+            fs << global.features.SGtriggerteam << std::endl;
+
+            //PS
+            fs << global.features.PStriggerenable << std::endl;
+            fs << global.features.PStriggerwait << std::endl;
+            fs << global.features.PStriggerkey << std::endl;
+            fs << global.features.PStriggerteam << std::endl;
+
+            //SR
+            fs << global.features.SRtriggerenable << std::endl;
+            fs << global.features.SRtriggerwait << std::endl;
+            fs << global.features.SRtriggerkey << std::endl;
+            fs << global.features.SRtriggerteam << std::endl;
+
+            //SMG
+            fs << global.features.SMGtriggerenable << std::endl;
+            fs << global.features.SMGtriggerwait << std::endl;
+            fs << global.features.SMGtriggerkey << std::endl;
+            fs << global.features.SMGtriggerteam << std::endl;
+
             //rcs
             fs << global.features.rcsenable << std::endl;
             fs << global.features.rcsscaleX << std::endl;
@@ -790,6 +822,38 @@ void Menu::ConfigMenu()
                 fs >> global.features.SMGaimbotfovcircle;
                 fs >> global.features.SMGaimbotdistance;
                 fs >> global.features.SMGautosleep;
+
+                //triggerbot
+
+//AR
+                fs >> global.features.ARtriggerenable;
+                fs >> global.features.ARtriggerwait;
+                fs >> global.features.ARtriggerkey;
+                fs >> global.features.ARtriggerteam;
+
+                //SG
+                fs >> global.features.SGtriggerenable;
+                fs >> global.features.SGtriggerwait;
+                fs >> global.features.SGtriggerkey;
+                fs >> global.features.SGtriggerteam;
+
+                //PS
+                fs >> global.features.PStriggerenable;
+                fs >> global.features.PStriggerwait;
+                fs >> global.features.PStriggerkey;
+                fs >> global.features.PStriggerteam;
+
+                //SR
+                fs >> global.features.SRtriggerenable;
+                fs >> global.features.SRtriggerwait;
+                fs >> global.features.SRtriggerkey;
+                fs >> global.features.SRtriggerteam;
+
+                //SMG
+                fs >> global.features.SMGtriggerenable;
+                fs >> global.features.SMGtriggerwait;
+                fs >> global.features.SMGtriggerkey;
+                fs >> global.features.SMGtriggerteam;
 
                 //rcs
                 fs >> global.features.rcsenable;
@@ -1359,7 +1423,7 @@ void Menu::PreviewMenu()
 void Menu::AimbotMenu()
 {
     ImGui::SetNextWindowPos({ 220, 0 });
-    ImGui::SetNextWindowSize({ 260, 620 });
+    ImGui::SetNextWindowSize({ 260, 840 });
 
     ImGui::Begin("aimbotmenu", NULL, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoTitleBar);
 
@@ -1370,9 +1434,9 @@ void Menu::AimbotMenu()
         TextCentered("Aimbot");
 
         ImGui::SetNextItemWidth(225);
-        ImGui::Combo("##Guns", &global.features.aimbotGunCombo, global.features.aimbotGunSelection, 5);
+        ImGui::Combo("##GunsAimbot", &global.features.aimbotGunCombo, global.features.GunSelection, 5);
 
-        if (ImGui::BeginChild("##aimbotAR", ImVec2(225, 370), true, ImGuiWindowFlags_NoScrollbar))
+        if (ImGui::BeginChild("##aimbot", ImVec2(225, 370), true, ImGuiWindowFlags_NoScrollbar))
         {
             //AR
             if (global.features.aimbotGunCombo == 0)
@@ -1516,7 +1580,96 @@ void Menu::AimbotMenu()
         ImGui::Spacing();
 
         ImGui::NewLine();
-        TextCentered("RCS");
+        TextCentered("Triggerbot");
+
+        ImGui::SetNextItemWidth(225);
+        ImGui::Combo("##GunsTrigger", &global.features.triggerGunCombo, global.features.GunSelection, 5);
+
+        if (ImGui::BeginChild("##triggerbot", ImVec2(225, 160), true, ImGuiWindowFlags_NoScrollbar))
+        {
+            //AR
+            if (global.features.triggerGunCombo == 0)
+            {
+                TextCentered("Assault Riffles");
+
+                ImGui::Checkbox("enable", &global.features.ARtriggerenable);
+                ImGui::Spacing();
+                ImGui::Spacing();
+                ImGui::SliderFloat("shot delay", &global.features.ARtriggerwait, 0, 400);
+                ImGui::Combo("hotkey", &global.features.ARtriggerkey, global.features.triggerBotKeySelection, 4);
+                ImGui::Spacing();
+                ImGui::Spacing();
+                ImGui::Checkbox("target team", &global.features.ARtriggerteam);
+            }
+
+            //SG
+            if (global.features.triggerGunCombo == 1)
+            {
+                TextCentered("Shotguns");
+
+                ImGui::Checkbox("enable", &global.features.SGtriggerenable);
+                ImGui::Spacing();
+                ImGui::Spacing();
+                ImGui::SliderFloat("shot delay", &global.features.SGtriggerwait, 0, 400);
+                ImGui::Combo("hotkey", &global.features.SGtriggerkey, global.features.triggerBotKeySelection, 4);
+                ImGui::Spacing();
+                ImGui::Spacing();
+                ImGui::Checkbox("target team", &global.features.SGtriggerteam);
+            }
+
+            //PS
+            if (global.features.triggerGunCombo == 2)
+            {
+                TextCentered("Pistols");
+
+                ImGui::Checkbox("enable", &global.features.PStriggerenable);
+                ImGui::Spacing();
+                ImGui::Spacing();
+                ImGui::SliderFloat("shot delay", &global.features.PStriggerwait, 0, 400);
+                ImGui::Combo("hotkey", &global.features.PStriggerkey, global.features.triggerBotKeySelection, 4);
+                ImGui::Spacing();
+                ImGui::Spacing();
+                ImGui::Checkbox("target team", &global.features.PStriggerteam);
+            }
+
+            //SR
+            if (global.features.triggerGunCombo == 3)
+            {
+                TextCentered("Snipers");
+
+                ImGui::Checkbox("enable", &global.features.SRtriggerenable);
+                ImGui::Spacing();
+                ImGui::Spacing();
+                ImGui::SliderFloat("shot delay", &global.features.SRtriggerwait, 0, 400);
+                ImGui::Combo("hotkey", &global.features.SRtriggerkey, global.features.triggerBotKeySelection, 4);
+                ImGui::Spacing();
+                ImGui::Spacing();
+                ImGui::Checkbox("target team", &global.features.SRtriggerteam);
+            }
+
+            //SMG
+            if (global.features.triggerGunCombo == 4)
+            {
+                TextCentered("SMGs");
+
+                ImGui::Checkbox("enable", &global.features.SMGtriggerenable);
+                ImGui::Spacing();
+                ImGui::Spacing();
+                ImGui::SliderFloat("shot delay", &global.features.SMGtriggerwait, 0, 400);
+                ImGui::Combo("hotkey", &global.features.SMGtriggerkey, global.features.triggerBotKeySelection, 4);
+                ImGui::Spacing();
+                ImGui::Spacing();
+                ImGui::Checkbox("target team", &global.features.SMGtriggerteam);
+            }
+        }
+        ImGui::EndChild();
+
+        ImGui::Spacing();
+        ImGui::Spacing();
+        ImGui::Spacing();
+
+        ImGui::NewLine();
+        TextCentered("Recoil Control System");
 
         if (ImGui::BeginChild("##rcs", ImVec2(225, 120), true, ImGuiWindowFlags_NoScrollbar))
         {

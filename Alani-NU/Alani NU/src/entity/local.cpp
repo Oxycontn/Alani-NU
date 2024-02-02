@@ -103,6 +103,11 @@ Vector2 CLocal::EyePosition() const noexcept
 	return driver.Read<Vector2>(localPlayerPawn + 0x1518);
 }
 
+int CLocal::CrosshairID() const noexcept
+{
+	return driver.Read<int>(localPlayerPawn + offset::m_iIDEntIndex);
+}
+
 int CLocal::GetWeaponGroup(std::string weaponName)
 {
 	int weaponGroup{};
@@ -128,4 +133,22 @@ int CLocal::GetWeaponGroup(std::string weaponName)
 		weaponGroup = 5;
 
 	return weaponGroup;
+}
+
+CCrosshair::CCrosshair(uintptr_t currentPawn)
+{
+	CCrosshair::currentPawn = currentPawn;
+}
+
+CCrosshair CCrosshair::GetCurrentPawn(uintptr_t entityList, int crosshairID)
+{
+	auto listEntry = driver.Read<uintptr_t>(entityList + 0x8 * ((crosshairID & 0x7FFF) >> 9) + 0x10);
+	auto currentPawn = driver.Read<uintptr_t>(listEntry + 0x78 * (crosshairID & 0x1FF));
+
+	return CCrosshair(currentPawn);
+}
+
+int CCrosshair::Team() const noexcept
+{
+	return driver.Read<int>(currentPawn + offset::m_iTeamNum);
 }

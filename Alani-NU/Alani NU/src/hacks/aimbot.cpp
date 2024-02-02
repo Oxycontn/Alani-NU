@@ -5,6 +5,7 @@
 #include "esp.h"
 #include "..\classes\bone.hpp"
 #include "rcs.h"
+#include "triggerbot.h"
 #include "..\mem\memory.h"
 #include "..\entity\local.h"
 
@@ -15,8 +16,8 @@ void CAimbot::AimbotThread()
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
         AimbotLoop();
-
-		rcs.RcsLoop();
+		trigger.TriggerBot();
+		rcs.RCS();
     }
 }
 

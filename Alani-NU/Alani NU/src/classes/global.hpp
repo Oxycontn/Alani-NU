@@ -74,11 +74,15 @@ public:
 		const char* comboSelections[4] = { "None", "2D Boxes", "Corners" };
 		const char* aimbotBoneSelections[4] = { "Head", "Neck", "Spine", "Crouch" };
 		const char* aimbotKeySelections[4] = { "Mouse Button 2", "LShift", "LCTL", "LClick" };
-		const char* aimbotGunSelection[5] = { "Assault Rifles", "Shotguns", "Pistols", "Sniper Rifles", "SMGs"};
+		const char* GunSelection[5] = { "Assault Rifles", "Shotguns", "Pistols", "Sniper Rifles", "SMGs"};
 		const char* bhopKeySelections[4] = { "Spacebar", "Mouse Button 2", "LCTL", "LShift" };
+		const char* triggerBotKeySelection[4] = { "Mouse Button 2", "LShift", "RMouse", "Mouse Button 1" };
+
+		//aimbot and triggetbot
+		int aimbotGunCombo;
+		int triggerGunCombo;
 
 		//aimbot
-		int aimbotGunCombo;
 
 		//AR
 		bool ARaimbotenable;
@@ -139,6 +143,38 @@ public:
 		bool PSaimbotvisable;
 		bool PSaimbotfovcircle;
 		int PSautosleep;
+
+		//triggetbot
+
+		//AR
+		bool ARtriggerenable;
+		float ARtriggerwait;
+		int ARtriggerkey;
+		bool ARtriggerteam;
+
+		//SG
+		bool SGtriggerenable;
+		float SGtriggerwait;
+		int SGtriggerkey;
+		bool SGtriggerteam;
+
+		//PS
+		bool PStriggerenable;
+		float PStriggerwait;
+		int PStriggerkey;
+		bool PStriggerteam;
+
+		//SR
+		bool SRtriggerenable;
+		float SRtriggerwait;
+		int SRtriggerkey;
+		bool SRtriggerteam;
+
+		//SMG
+		bool SMGtriggerenable;
+		float SMGtriggerwait;
+		int SMGtriggerkey;
+		bool SMGtriggerteam;
 
 		//rcs
 		bool rcsenable;
@@ -206,6 +242,9 @@ namespace offset
 	constexpr std::ptrdiff_t m_aimPunchCache = 0x1740;
 	constexpr std::ptrdiff_t m_entitySpottedState = 0x1638;
 	constexpr std::ptrdiff_t m_fFlags = 0x3C8;
+
+	// triggerbot
+	constexpr std::ptrdiff_t m_iIDEntIndex = 0x1544;
 
 	// world entites
 	constexpr std::ptrdiff_t m_pEntity = 0x10;

@@ -153,6 +153,7 @@
     <ClCompile Include="src\entity\local.cpp" />
     <ClCompile Include="src\hacks\rcs.cpp" />
     <ClCompile Include="src\entity\wentity.cpp" />
+    <ClCompile Include="src\hacks\triggerbot.cpp" />
     <ClCompile Include="src\overlay\overlay.cpp" />
     <ClCompile Include="src\core\main.cpp" />
     <ClCompile Include="src\math\vector.cpp" />
@@ -181,6 +182,7 @@
     <ClInclude Include="src\entity\local.h" />
     <ClInclude Include="src\hacks\rcs.h" />
     <ClInclude Include="src\entity\wentity.h" />
+    <ClInclude Include="src\hacks\triggerbot.h" />
     <ClInclude Include="src\mem\memory.h" />
     <ClInclude Include="src\overlay\overlay.hpp" />
     <ClInclude Include="src\math\vector.hpp" />

@@ -32,7 +32,21 @@ public:
 	int Flags() const noexcept;
 	aimPunchCache AimPunch() const noexcept;
 	Vector2 EyePosition() const noexcept;
+	int CrosshairID() const noexcept;
 
 private:
 	uintptr_t localPlayerPawn{};
+};
+
+class CCrosshair
+{
+public:
+	CCrosshair(uintptr_t currentPawn);
+
+	static CCrosshair GetCurrentPawn(uintptr_t entityList, int crosshairID);
+
+	int Team() const noexcept;
+
+private:
+	uintptr_t currentPawn;
 };
